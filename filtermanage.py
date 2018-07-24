@@ -38,6 +38,8 @@ class Band():
        if not isQuantity(zeropoint):
           raise Exception("Wavelength must be an astropy Quantity")
 
+       # Check that units of inputs are correct dimensions.
+       # This is done by trying to convert them to angstrom, jansky
        try: 
            wavelength.to(u.angstrom)
        except Exception:
@@ -261,16 +263,23 @@ class FilterSetManager():
        return u.Magnitude(-2.5*np.log10(fval/zpjy.value))
 
 
+#### EXAMPLE USAGE ####
 if __name__ == "__main__":
 
        """Example usage"""
        fsm = FilterSetManager()
+
        f = fsm.magtoflux("sloan","u",10)
+       # note return value is Quantity
        print(f)
        print(f.to(u.Jy))
        print(f.to(u.mJy))
+
        m = fsm.fluxtomag("sloan","u",156.85,mjy=True)
-       print(m)
+       # magnitude Quantity 
+       print(m) 
+
+       # example using Quantity instead of scalar value input
        q = 1000*u.mJy
        m = fsm.fluxtomag("spitzer","M24",q)
        print(m)
