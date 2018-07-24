@@ -22,7 +22,7 @@ class Band():
     Class to hold information about a band (filter)
 
     Parameters:
-       name (str): name of the band, e.g. 'u'
+       name (str): canonical name of the band, e.g. 'u'
        wavelength (astropy.units.quantity.Quantity): mean wavelength of the band
        bandwidth (astropy.units.quantity.Quantity):  effective bandwidth of the band, in units of (wave)length
        zeropoint (astropy.units.quantity.Quantity):  equivalent flux density of zero magnitude
@@ -61,7 +61,7 @@ class Band():
        # flux zeropoint
        self._zeropoint  = zeropoint
 
-    """Returns band name"""
+    """Returns band canonical name"""
     def name(self): return self._name
 
     """Returns mean wavelength (astropy Quantity)"""
