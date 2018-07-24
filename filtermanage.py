@@ -17,12 +17,65 @@ def isQuantity(q):
    """
    return type(q) == Quantity
 
+"""Telescope names"""
+SDSS     = "SDSS"
+SLOAN    = "SDSS"
+SPITZER  = "Spitzer"
+GAIA     = "GAIA"
+HERSCHEL = "Herschel"
+TWOMASS  = "2MASS"
+WISE     = "WISE"
+
+
+"""Photometric band names. Where common, use same names as SedFitter code (Robitaille)"""
+
+# Sloan Digital Sky Survey
+SDSS_u = "u"
+SDSS_g = "g"
+SDSS_r = "r"
+SDSS_i = "i"
+SDSS_z = "z"
+# Bessel UVBRI
+U       = "BU"
+B       = "BB"
+V       = "BV"
+R       = "BR"
+I       = "BI"
+# GAIA
+GAIA_G  = "G"
+GAIA_B  = "BP"
+GAIA_R  = "RP"
+# 2MASS
+TWOMASS_J = "2J"
+TWOMASS_H = "2H"
+TWOMASS_K = "2K"
+DENIS_I   = "Id"
+USNO_B    = "Bu"
+USNO_R    = "Ru"
+# Spitzer
+IRAC1 = "I1"
+IRAC2 = "I2"
+IRAC3 = "I3"
+IRAC4 = "I4"
+MIPS1 = "M1"
+MIPS2 = "M2"
+MIPS3 = "M3"
+# Herschel
+PACS_B = "PACS1"
+PACS_G = "PACS2"
+PACS_R = "PACS3"
+# WISE
+WISE1  = "WISE1"
+WISE2  = "WISE2"
+WISE3  = "WISE3"
+WISE4  = "WISE3"
+
 class Band():
     """
-    Class to hold information about a band (filter)
+    Class to hold information about a photometric band (filter)
 
     Parameters:
-       name (str): canonical name of the band, e.g. 'u'
+       name (str): canonical name of the band, e.g. 'u' or SDSS_u
        wavelength (astropy.units.quantity.Quantity): mean wavelength of the band
        bandwidth (astropy.units.quantity.Quantity):  effective bandwidth of the band, in units of (wave)length
        zeropoint (astropy.units.quantity.Quantity):  equivalent flux density of zero magnitude
@@ -119,50 +172,50 @@ class FilterSet():
 # Create any new FilterSets here.
 
 # SDSS
-sloan    = [Band('u', 3561.8*u.angstrom,  558.4*u.angstrom, 1568.5*u.jansky),
-            Band('g', 4718.9*u.angstrom, 1158.4*u.angstrom, 3965.9*u.jansky),
-            Band('r', 6185.2*u.angstrom, 1111.2*u.angstrom, 3162.0*u.jansky),
-            Band('i', 7499.7*u.angstrom, 1044.6*u.angstrom, 2602.0*u.jansky),
-            Band('z', 8961.5*u.angstrom, 1124.6*u.angstrom, 2244.7*u.jansky)
+sloan    = [Band(SDSS_u, 3561.8*u.angstrom,  558.4*u.angstrom, 1568.5*u.jansky),
+            Band(SDSS_g, 4718.9*u.angstrom, 1158.4*u.angstrom, 3965.9*u.jansky),
+            Band(SDSS_r, 6185.2*u.angstrom, 1111.2*u.angstrom, 3162.0*u.jansky),
+            Band(SDSS_i, 7499.7*u.angstrom, 1044.6*u.angstrom, 2602.0*u.jansky),
+            Band(SDSS_z, 8961.5*u.angstrom, 1124.6*u.angstrom, 2244.7*u.jansky)
            ]
 
 # Gaia 2nd Release (GAIA2r) values
-gaia    = [Band('BP', 5278.6*u.angstrom, 2279.4*u.angstrom, 3393.3*u.jansky),
-           Band( 'G', 6773.7*u.angstrom, 4358.4*u.angstrom, 2835.1*u.jansky),
-           Band('RP', 7919.1*u.angstrom, 2943.7*u.angstrom, 2485.1*u.jansky)
+gaia    = [Band(GAIA_B, 5278.6*u.angstrom, 2279.4*u.angstrom, 3393.3*u.jansky),
+           Band(GAIA_G, 6773.7*u.angstrom, 4358.4*u.angstrom, 2835.1*u.jansky),
+           Band(GAIA_R, 7919.1*u.angstrom, 2943.7*u.angstrom, 2485.1*u.jansky)
           ]
 # 2MASS
-twomass = [Band('J', 12350.0*u.angstrom, 1624.1*u.angstrom, 1594.0*u.jansky), 
-           Band('H', 16620.0*u.angstrom, 2509.4*u.angstrom, 1024.0*u.jansky), 
-           Band('K', 21590.0*u.angstrom, 2618.9*u.angstrom,  666.8*u.jansky)
+twomass = [Band(TWOMASS_J, 12350.0*u.angstrom, 1624.1*u.angstrom, 1594.0*u.jansky), 
+           Band(TWOMASS_H, 16620.0*u.angstrom, 2509.4*u.angstrom, 1024.0*u.jansky), 
+           Band(TWOMASS_K, 21590.0*u.angstrom, 2618.9*u.angstrom,  666.8*u.jansky)
           ]
 
 # Spitzer Space Telescope
-spitzer = [Band('I1'  ,  35572.6*u.angstrom ,    6836.2*u.angstrom, 277.2*u.jansky), 
-           Band('I2'  ,  45049.3*u.angstrom ,    8649.9*u.angstrom, 179.0*u.jansky), 
-           Band('I3'  ,  57385.7*u.angstrom ,   12561.2*u.angstrom, 113.8*u.jansky), 
-           Band('I4'  ,  79273.7*u.angstrom ,   25288.5*u.angstrom,  62.0*u.jansky), 
-           Band('M24' , 238433.1*u.angstrom ,   52963.2*u.angstrom,   7.1*u.jansky), 
-           Band('M70' , 725555.3*u.angstrom ,  213015.3*u.angstrom,   0.8*u.jansky), 
-           Band('M160',1569627.1*u.angstrom ,  357530.2*u.angstrom,   0.2*u.jansky)
+spitzer = [Band(IRAC1 , 35572.6*u.angstrom ,    6836.2*u.angstrom, 277.2*u.jansky), 
+           Band(IRAC2 , 45049.3*u.angstrom ,    8649.9*u.angstrom, 179.0*u.jansky), 
+           Band(IRAC3 , 57385.7*u.angstrom ,   12561.2*u.angstrom, 113.8*u.jansky), 
+           Band(IRAC4 , 79273.7*u.angstrom ,   25288.5*u.angstrom,  62.0*u.jansky), 
+           Band(MIPS1 , 238433.1*u.angstrom ,  52963.2*u.angstrom,   7.1*u.jansky), 
+           Band(MIPS2  , 725555.3*u.angstrom , 213015.3*u.angstrom,   0.8*u.jansky), 
+           Band(MIPS3 ,1569627.1*u.angstrom , 357530.2*u.angstrom,   0.2*u.jansky)
           ]
 
 # Herschel Space Telescope
-herschel = [Band('PACSB',  719334.2*u.angstrom, 214148.9*u.angstrom, 0.8*u.jansky),
-            Band('PACSG', 1026174.6*u.angstrom, 312860.0*u.angstrom, 0.4*u.jansky),
-            Band('PACSR', 1671355.3*u.angstrom, 697595.3*u.angstrom, 0.1*u.jansky)
+herschel = [Band(PACS_B,  719334.2*u.angstrom, 214148.9*u.angstrom, 0.8*u.jansky),
+            Band(PACS_G, 1026174.6*u.angstrom, 312860.0*u.angstrom, 0.4*u.jansky),
+            Band(PACS_R, 1671355.3*u.angstrom, 697595.3*u.angstrom, 0.1*u.jansky)
            ]
 
 # Widefield Infrared Space Explorer (WISE)
-wise     = [Band('W1',33526.0*u.angstrom, 6626.4*u.angstrom,  309.5*u.jansky),
-            Band('W2',46028.0*u.angstrom, 10422.7*u.angstrom, 171.8*u.jansky),
-            Band('W3',115608.0*u.angstrom, 55055.7*u.angstrom, 31.7*u.jansky),
-            Band('W4',220883.0*u.angstrom, 41016.8*u.angstrom,  8.4*u.jansky)
+wise     = [Band(WISE1,33526.0*u.angstrom, 6626.4*u.angstrom,  309.5*u.jansky),
+            Band(WISE2,46028.0*u.angstrom, 10422.7*u.angstrom, 171.8*u.jansky),
+            Band(WISE3,115608.0*u.angstrom, 55055.7*u.angstrom, 31.7*u.jansky),
+            Band(WISE4,220883.0*u.angstrom, 41016.8*u.angstrom,  8.4*u.jansky)
            ]
 
 # add any new FilterSets to this list
 all_filtersets = [ sloan, gaia, twomass, spitzer, herschel, wise ]
-all_names      = [ "sloan", "gaia", "twomass", "spitzer", "herschel", "wise" ]
+all_names      = [ SDSS, GAIA, TWOMASS, SPITZER, HERSCHEL, WISE ]
 
 
 ######################################################################################
@@ -226,13 +279,13 @@ class FilterSetManager():
        """Return the flux density in Jansky or milliJansky of a source as an astropy Quantity, 
           given the source magnitude.
           Parameters:
-             telescope - string telescope name, one of
-                         sloan, gaia, 2MASS, Spitzer, Herschel, Wise - case insensitive
-             band      - wave band name of telescope e.g., 'u' for sloan, 'I1' for spitzer
+             telescope - string or (string constant) telescope name, e.g.
+                         SDSS, 'gaia', '2MASS', 'Spitzer', HERSCHEL, WISE 
+             band      - wave band name of telescope e.g., 'u' or SDSS_u for Sloan, IRAC1 or 'I1' for spitzer
              magnitude - magnitude of source, as scalar or astropy magnitude Quantity
              mjy       - boolean to return flux in mJy. True returns mJy, False returns Jy. Default:True
        """
-       zpjy = self._filtersets[telescope][band].zp().to(u.Jy)
+       zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
        if isQuantity(magnitude):
            value = zpjy*10.0**(magnitude.value/-2.5)
        else:
@@ -254,7 +307,7 @@ class FilterSetManager():
              flux      - flux density of source, scalar in Jy or mJy, or Astropy Quantity with units of flux density
              mjy       - boolean, True if flux was given in mJy False if Jy. Ignored if flux is given as Quantity
        """
-       zpjy = self._filtersets[telescope][band].zp().to(u.Jy)
+       zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
        if isQuantity(flux):
            fval = flux.to(u.Jy).value
        else:
@@ -268,18 +321,19 @@ if __name__ == "__main__":
 
        """Example usage"""
        fsm = FilterSetManager()
+       print("Filter sets imported:%s"%fsm.filtersetnames())
 
-       f = fsm.magtoflux("sloan","u",10)
+       f = fsm.magtoflux(SDSS,SDSS_u,10)
        # note return value is Quantity
        print(f)
        print(f.to(u.Jy))
        print(f.to(u.mJy))
 
-       m = fsm.fluxtomag("sloan","u",156.85,mjy=True)
+       m = fsm.fluxtomag(SDSS,SDSS_u,156.85,mjy=True)
        # magnitude Quantity 
        print(m) 
 
        # example using Quantity instead of scalar value input
        q = 1000*u.mJy
-       m = fsm.fluxtomag("spitzer","M24",q)
+       m = fsm.fluxtomag(SPITZER,MIPS1,q)
        print(m)
