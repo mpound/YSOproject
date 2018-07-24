@@ -8,6 +8,14 @@
 #
 import numpy as np
 from astropy import units as u
+from astropy.units.quantity import Quantity
+
+def isQuantity(q):
+   """Test if input is an Astropy Quantity object
+      Parameters: 
+        q - input object to test
+   """
+   return type(q) == Quantity
 
 class Band():
     """
@@ -23,11 +31,11 @@ class Band():
        # canonical name
        self._name = name
        # mean wavelength
-       if type(wavelength) != u.quantity.Quantity:
+       if not isQuantity(wavelength):
           raise Exception("Wavelength must be an astropy Quantity")
-       if type(bandwidth) != u.quantity.Quantity:
+       if not isQuantity(bandwidth):
           raise Exception("Wavelength must be an astropy Quantity")
-       if type(zeropoint) != u.quantity.Quantity:
+       if not isQuantity(zeropoint):
           raise Exception("Wavelength must be an astropy Quantity")
 
        try: 
@@ -153,6 +161,8 @@ wise     = [Band('W1',33526.0*u.angstrom, 6626.4*u.angstrom,  309.5*u.jansky),
 # add any new FilterSets to this list
 all_filtersets = [ sloan, gaia, twomass, spitzer, herschel, wise ]
 all_names      = [ "sloan", "gaia", "twomass", "spitzer", "herschel", "wise" ]
+
+
 ######################################################################################
 
 class FilterSetManager():
@@ -215,13 +225,16 @@ class FilterSetManager():
           given the source magnitude.
           Parameters:
              telescope - string telescope name, one of
-                         sloan, gaia, 2MASS, Spitzer, Herschel - case insensitive
-             band      - wave band of telescope e.g., 'u' for sloan, 'I1' for spitzer
-             magnitude - magnitude of source
+                         sloan, gaia, 2MASS, Spitzer, Herschel, Wise - case insensitive
+             band      - wave band name of telescope e.g., 'u' for sloan, 'I1' for spitzer
+             magnitude - magnitude of source, as scalar or astropy magnitude Quantity
              mjy       - boolean to return flux in mJy. True returns mJy, False returns Jy. Default:True
        """
        zpjy = self._filtersets[telescope][band].zp().to(u.Jy)
-       value = zpjy*10.0**(magnitude/-2.5)
+       if isQuantity(magnitude):
+           value = zpjy*10.0**(magnitude.value/-2.5)
+       else:
+           value = zpjy*10.0**(magnitude/-2.5)
        if mjy == True:
            return value.to(u.mJy)
        else:
@@ -234,23 +247,30 @@ class FilterSetManager():
        """Return the magnitude given flux in Jansky as magnitude astropy Quantity.
           Parameters:
              telescope - string telescope name, one of
-                         sloan, gaia, 2MASS, Spitzer, Herschel - case insensitive
-             band      - wave band of telescope e.g., 'u' for sloan, 'I1' for spitzer
-             flux      - flux density of source in Jy or mJy
-             mjy       - boolean, True if flux was given in mJy False if Jy
+                         sloan, gaia, 2MASS, Spitzer, Herschel, Wise - case insensitive
+             band      - wave band name of telescope e.g., 'u' for sloan, 'I1' for spitzer
+             flux      - flux density of source, scalar in Jy or mJy, or Astropy Quantity with units of flux density
+             mjy       - boolean, True if flux was given in mJy False if Jy. Ignored if flux is given as Quantity
        """
        zpjy = self._filtersets[telescope][band].zp().to(u.Jy)
-       if mjy==True: flux /= 1000.0
-       return u.Magnitude(-2.5*np.log10(flux/zpjy.value))
+       if isQuantity(flux):
+           fval = flux.to(u.Jy).value
+       else:
+           if mjy==True: fval = flux / 1000.0
+           else:         fval = flux
+       return u.Magnitude(-2.5*np.log10(fval/zpjy.value))
 
 
 if __name__ == "__main__":
 
        """Example usage"""
-       fo = FilterSetManager()
-       f = fo.magtoflux("sloan","u",10)
+       fsm = FilterSetManager()
+       f = fsm.magtoflux("sloan","u",10)
        print(f)
        print(f.to(u.Jy))
        print(f.to(u.mJy))
-       m = fo.fluxtomag("sloan","u",156.85,mjy=True)
+       m = fsm.fluxtomag("sloan","u",156.85,mjy=True)
+       print(m)
+       q = 1000*u.mJy
+       m = fsm.fluxtomag("spitzer","M24",q)
        print(m)
