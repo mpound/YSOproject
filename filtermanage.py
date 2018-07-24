@@ -7,6 +7,7 @@
 # MWP - Tue Jul 24 13:39:14 EDT 2018
 #
 import numpy as np
+import enum
 from astropy import units as u
 from astropy.units.quantity import Quantity
 
@@ -18,7 +19,7 @@ def isQuantity(q):
    return type(q) == Quantity
 
 """Telescope names"""
-SDSS     = "SDSS"
+#SDSS     = "SDSS"
 SLOAN    = "SDSS"
 SPITZER  = "Spitzer"
 GAIA     = "GAIA"
@@ -28,7 +29,8 @@ WISE     = "WISE"
 
 
 """Photometric band names. Where common, use same names as SedFitter code (Robitaille)"""
-
+# @Todo Replace all these with Enums?
+#SDSS = Enum(SLOAN, "u g r i z")
 # Sloan Digital Sky Survey
 SDSS_u = "u"
 SDSS_g = "g"
@@ -215,7 +217,7 @@ wise     = [Band(WISE1,33526.0*u.angstrom, 6626.4*u.angstrom,  309.5*u.jansky),
 
 # add any new FilterSets to this list
 all_filtersets = [ sloan, gaia, twomass, spitzer, herschel, wise ]
-all_names      = [ SDSS, GAIA, TWOMASS, SPITZER, HERSCHEL, WISE ]
+all_names      = [ SLOAN, GAIA, TWOMASS, SPITZER, HERSCHEL, WISE ]
 
 
 ######################################################################################
@@ -280,7 +282,7 @@ class FilterSetManager():
           given the source magnitude.
           Parameters:
              telescope - string or (string constant) telescope name, e.g.
-                         SDSS, 'gaia', '2MASS', 'Spitzer', HERSCHEL, WISE 
+                         SLOAN, 'gaia', '2MASS', 'Spitzer', HERSCHEL, WISE 
              band      - wave band name of telescope e.g., 'u' or SDSS_u for Sloan, IRAC1 or 'I1' for spitzer
              magnitude - magnitude of source, as scalar or astropy magnitude Quantity
              mjy       - boolean to return flux in mJy. True returns mJy, False returns Jy. Default:True
@@ -323,13 +325,13 @@ if __name__ == "__main__":
        fsm = FilterSetManager()
        print("Filter sets imported:%s"%fsm.filtersetnames())
 
-       f = fsm.magtoflux(SDSS,SDSS_u,10)
+       f = fsm.magtoflux(SLOAN,SDSS_u,10)
        # note return value is Quantity
        print(f)
        print(f.to(u.Jy))
        print(f.to(u.mJy))
 
-       m = fsm.fluxtomag(SDSS,SDSS_u,156.85,mjy=True)
+       m = fsm.fluxtomag(SLOAN,SDSS_u,156.85,mjy=True)
        # magnitude Quantity 
        print(m) 
 
@@ -337,3 +339,6 @@ if __name__ == "__main__":
        q = 1000*u.mJy
        m = fsm.fluxtomag(SPITZER,MIPS1,q)
        print(m)
+       SDSS = enum.Enum(SLOAN, "u g r i z")
+       print(SDSS.u.value)
+       print(SDSS.u.name)
