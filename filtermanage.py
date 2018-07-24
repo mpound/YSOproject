@@ -10,6 +10,15 @@ import numpy as np
 from astropy import units as u
 
 class Band():
+    """
+    Class to hold information about a band (filter)
+
+    Parameters:
+       name (str): name of the band, e.g. 'u'
+       wavelength (astropy.units.quantity.Quantity): mean wavelength of the band
+       bandwidth (astropy.units.quantity.Quantity):  effective bandwidth of the band, in units of (wave)length
+       zeropoint (astropy.units.quantity.Quantity):  equivalent flux density of zero magnitude
+    """
     def __init__(self,name,wavelength,bandwidth,zeropoint):
        # canonical name
        self._name = name
@@ -42,37 +51,57 @@ class Band():
        # flux zeropoint
        self._zeropoint  = zeropoint
 
+    """Returns band name"""
     def name(self): return self._name
+
+    """Returns mean wavelength (astropy Quantity)"""
     def wave(self): return self._wavelength
+
+    """Returns effective bandwidth (astropy Quantity)"""
     def bw(self):   return self._bandwidth
+
+    """Returns zero point flux density (astropy Quantity)"""
     def zp(self):   return self._zeropoint
 
 class FilterSet():
-    def __init__(self,name,bands=None):
+    """
+    Class to hold information about a full set of filters, e.g. Sloan u,g,r,i,z
+    This class acts as a dictionary, keyed by the stored Band names (lowercase).
+    
+    Parameters:
+         name (str): name of the filter set
+         bands (obj): Band or list of Bands to add to the set, optional. See also addBands()
 
-       self._name  = name  # Case-insenitive!
+    Bands will be stored in an internal dictionary indexed by the lowercase bandname.
+    """
+
+    def __init__(self,name,bands=None):
+       self._name  = name  
        self._bands = dict()
        if bands != None: self.addBands(bands)
 
     # add one or more Band objects
     # Parameters:
-    #   bands - single Band or list of Bands
-
+    #   bands:  single Band or list of Bands
     def addBands(self,bands):
        if type(bands) != list:
           bands=list(bands)
        for band in bands:
             self._bands[band._name.lower()] = band
 
+    # make this class act like a dictionary keyed by band name
+    """Returns Band object associated with band name (case insensitive)"""
     def __getitem__(self,bandname):
        return self._bands[bandname.lower()]
 
+    # make this class act like a dictionary keyed by band name
+    """Set Band object associated with band name (case insensitive)"""
     def __setitem__(self,bandname,band):
        if type(band) != Band:
           raise Exception("Assignment value must be a Band object")
        self._bands[bandname.lower()] = band
  
-########################################################################################3
+######################################################################################
 # Mean wavelengths and effective bandwidths in angstrom & Zero Points 
 # in Jansky of various filter sets,  taken from VOSA website.  
 # http://svo2.cab.inta-csic.es/theory/fps/
@@ -126,8 +155,9 @@ all_filtersets = [ sloan, gaia, twomass, spitzer, herschel, wise ]
 all_names      = [ "sloan", "gaia", "twomass", "spitzer", "herschel", "wise" ]
 ######################################################################################
 
-class FilterOps():
+class FilterSetManager():
 
+    """Class to manage operations associated with sets of filters (Bands)"""
     # Add all filtersets 
     def __init__(self):
        self._filtersets = dict()
@@ -141,6 +171,11 @@ class FilterOps():
  
        self.addFilterSets(self._fslist)
 
+    """
+    Add a set of filters.
+    Parameters;
+      filtersets - a list of FilterSet objects or single FilterSet
+    """
     def addFilterSets(self,filtersets):
        if type(filtersets) != list:
             filtersets=list(filtersets)
@@ -152,18 +187,23 @@ class FilterOps():
     def __getitem__(self,name):
        return self._filtersets[name.lower()]
 
+    """Return all stored FilterSet names"""
     def filtersetnames(self):
        return self._filtersets.keys()
 
+    """Return all Band names of a given FilterSet"""
     def bandnames(self,filterset):
        return self._filtersets[filterset].keys()
 
+    """Return all the zero point of a given Band and FilterSet, as astropy Quantity"""
     def zeropoint(self,filterset,band):
        return self._filtersets[filterset][band].zp()
 
+    """Return all the mean wavelength of a given Band and FilterSet, as astropy Quantity"""
     def wavelength(self,filterset,band):
        return self._filtersets[filterset][band].wave()
 
+    """Return all the effective bandwidth of a given Band and FilterSet, as astropy Quantity"""
     def bandwidth(self,filterset,band):
        return self._filtersets[filterset][band].bw()
 
@@ -171,7 +211,7 @@ class FilterOps():
     # Example: magtoflux("sloan","u",10)  returns 156.85 mJy 
     # @returns astropy Quantity with units u.mJy or u.Jy
     def magtoflux(self,telescope,band,magnitude,mjy=True):
-       """Return the flux in Jansky or milliJansky of a source as flux astropy Quantity, 
+       """Return the flux density in Jansky or milliJansky of a source as an astropy Quantity, 
           given the source magnitude.
           Parameters:
              telescope - string telescope name, one of
@@ -191,12 +231,12 @@ class FilterOps():
     # Example: fluxtomag("sloan","u",156.85)  returns 10 mag
     # @returns astropy Quantity with units u.Magnitude)
     def fluxtomag(self,telescope,band,flux,mjy=True):
-       """Return the magnitude given flux in Jansky as magnitue astropy Quantity
+       """Return the magnitude given flux in Jansky as magnitude astropy Quantity.
           Parameters:
              telescope - string telescope name, one of
                          sloan, gaia, 2MASS, Spitzer, Herschel - case insensitive
              band      - wave band of telescope e.g., 'u' for sloan, 'I1' for spitzer
-             flux      - flux of source in Jy or mJy
+             flux      - flux density of source in Jy or mJy
              mjy       - boolean, True if flux was given in mJy False if Jy
        """
        zpjy = self._filtersets[telescope][band].zp().to(u.Jy)
@@ -206,7 +246,8 @@ class FilterOps():
 
 if __name__ == "__main__":
 
-       fo = FilterOps()
+       """Example usage"""
+       fo = FilterSetManager()
        f = fo.magtoflux("sloan","u",10)
        print(f)
        print(f.to(u.Jy))
