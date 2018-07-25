@@ -19,7 +19,7 @@ def isQuantity(q):
    return type(q) == Quantity
 
 """Telescope names"""
-#SDSS     = "SDSS"
+SDSS     = "SDSS"
 SLOAN    = "SDSS"
 SPITZER  = "Spitzer"
 GAIA     = "GAIA"
@@ -339,6 +339,6 @@ if __name__ == "__main__":
        q = 1000*u.mJy
        m = fsm.fluxtomag(SPITZER,MIPS1,q)
        print(m)
-       SDSS = enum.Enum(SLOAN, "u g r i z")
-       print(SDSS.u.value)
-       print(SDSS.u.name)
+       #SDSS = enum.Enum(SLOAN, "u g r i z")
+       #print(SDSS.u.value)
+       #print(SDSS.u.name)
