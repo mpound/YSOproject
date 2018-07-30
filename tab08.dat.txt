@@ -1,10 +1,11 @@
 \ The u'g'r'i'z' standard star network: calibrated magnitudes and colors (Table 8 of Smith et al. 2002, AJ, 123, 2121)
 \ ====================================================================================================================
 \ NOT! A machine-readable version of this table is also available at www.journals.uchicago.edu/AJ/journal/issues/v123n4/201445/datafile8.txt
-|   StarName  |   RA (J2000.0) |  DEC (J2000.0)   |      r'   |    u'-g' |    g'-r' |    r'-i'  |   i'-z'    |    rms r'|  rms u'-g'| rms g'-r' |rms r'-i'| rms i'-z'  |    n u' |  n g' |  n r' |  n i'  | n z' |
-|    char     |     char       |    char          |     float |   float  |   float  |   float   |    float   |     float|   float   |   float   | float   |  float     |         |       |       |        |      |
+|   StarName  |   RA2000       |  DEC2000         |      r'   |    u'-g' |    g'-r' |    r'-i'  |   i'-z'    |    rms r'|  rms u'-g'| rms g'-r' |rms r'-i'| rms i'-z'  |    n u' |  n g' |  n r' |  n i'  | n z' |
+\| IPAC format does not allow non-alphanumeic characters in headers so delete the single quote
+|    char     |     char       |    char          |     float |   float  |   float  |   float   |    float   |     float|   float   |   float   | float   |  float     |    int  |  int  |  int  |  int   | int  |
 |             |     hms        |    dms           |     mag   |     mag  |    mag   |     mag   |    mag     |     mag  |   mag     |   mag     | mag     |  mag       |         |       |       |        |      |
-|             |                |                  |           |          |          |           |            |          |           |           |         |            |         |       |       |        |      |
+\|             |                |                  |           |          |          |           |            |          |           |           |         |            |         |       |       |        |      |
      Hilt 31     00:28:11.15      +64:07:51.8         10.996      0.999      0.587      0.294      0.147         0.001      0.003      0.001      0.001      0.002          16      16      16      15      15  
    G 158-100     00:33:54.60      -12:07:58.9         14.691      1.101      0.510      0.222      0.092         0.006      0.019      0.008      0.007      0.010           6       7       8       6       6  
   BD+71 0031     00:43:44.34      +72:10:43.1         10.091      0.896      0.260      0.079      0.007         0.001      0.003      0.002      0.002      0.004          14      14      14      14      14  
