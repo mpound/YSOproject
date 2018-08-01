@@ -70,7 +70,7 @@ PACS_R = "PACS3"
 WISE1  = "WISE1"
 WISE2  = "WISE2"
 WISE3  = "WISE3"
-WISE4  = "WISE3"
+WISE4  = "WISE4"
 
 class Band():
     """
@@ -317,6 +317,53 @@ class FilterSetManager():
            else:         fval = flux
        return u.Magnitude(-2.5*np.log10(fval/zpjy.value))
 
+class Photometry():
+    "A single photometric point"
+    def __init__(self,bandname,flux,error,validity,unit=None):
+       self._bandname = bandname
+       #@todo check that flux and error have same units
+       #@todo check that flux and error are magnitude or jansky
+       # def isFlux /def isMagnitude
+       if isQuantity(flux):
+           self._flux = flux
+       else:
+           if unit == None:
+               raise Exception("flux or unit must be a Magnitude or Flux Density Quantity")
+           else:
+               self._flux = flux*unit
+       if isQuantity(error):
+           self._error = error 
+       else:
+           if unit == None:
+               raise Exception("error must be a Magnitude or Flux Density Quantity")
+           else:
+               self._error = error*unit
+       self._validity = validity
+
+     def band(self):
+         return self._bandname
+
+     def flux(self):
+         return self._flux
+
+     def validity(self):
+         return self._validity
+
+     def error(self):
+         return self._error
+
+     def units(self):
+         return "whatever astropy quanitity units accessor is"
+
+class PhotometryManager():
+    def __init__(self):
+       self._photometry = dict()
+
+    def addData(self,bandname,flux,error,validity,unit=None):
+       #@todo check that bandname is one of our list above.
+       # def isValidBandname()
+       self._photometry[bandname] = Photometry(bandname,flux,error,validity,unit)
+          
 
 #### EXAMPLE USAGE ####
 if __name__ == "__main__":
