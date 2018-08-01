@@ -53,7 +53,7 @@ if SelectData:
 else:
     selectedtable = Table.read(datadir+"serpens_test_area.tbl",format="ipac")
 
-plt.scatter(selectedtable['ra'],selectedtable['dec'],color='green',s=3)
+plt.scatter(selectedtable['ra'],selectedtable['dec'],color='green',s=25, facecolors='none')
 # The 1 square degree box defined for this test
 rect = patches.Rectangle((280.25,-0.25),-1.0,1.0,fill=False,color='green')
 ax.add_patch(rect)
