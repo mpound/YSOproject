@@ -18,6 +18,24 @@ def isQuantity(q):
    """
    return type(q) == Quantity
 
+def isFluxDensity(q):
+   """Test if input is an Astropy Quantity with units of flux density
+      Parameters: 
+        q - input object to test
+   """
+   if isQuantity(q):
+       return q.unit.is_equivalent("Jy")
+   return False
+
+def isMagnitude(q):
+   """Test if input is an Astropy Quantity with units of astronomical magnitude
+      Parameters: 
+        q - input object to test
+   """
+   if isQuantity(q):
+       return q.unit.is_equivalent("mag")
+   return False
+
 """Telescope names"""
 SDSS     = "SDSS"
 SLOAN    = "SDSS"
@@ -51,9 +69,9 @@ GAIA_R  = "RP"
 TWOMASS_J = "2J"
 TWOMASS_H = "2H"
 TWOMASS_K = "2K"
-DENIS_I   = "Id"
-USNO_B    = "Bu"
-USNO_R    = "Ru"
+#DENIS_I   = "Id"
+#USNO_B    = "Bu"
+#USNO_R    = "Ru"
 # Spitzer
 IRAC1 = "I1"
 IRAC2 = "I2"
@@ -71,6 +89,52 @@ WISE1  = "WISE1"
 WISE2  = "WISE2"
 WISE3  = "WISE3"
 WISE4  = "WISE4"
+
+_valid_bands = [
+    # Sloan
+    SDSS_u,
+    SDSS_g,
+    SDSS_r,
+    SDSS_i,
+    SDSS_z,
+    # Bessel UVBRI
+    U,
+    B,
+    V,
+    R,
+    I,
+    GAIA_G,
+    GAIA_B,
+    GAIA_R,
+    # 2MASS
+    TWOMASS_J,
+    TWOMASS_H,
+    TWOMASS_K,
+    #DENIS_I,
+    #USNO_B,
+    #USNO_R,
+    # Spitzer
+    IRAC1,
+    IRAC2,
+    IRAC3,
+    IRAC4,
+    MIPS1,
+    MIPS2,
+    MIPS3,
+    # Herschel
+    PACS_B,
+    PACS_G,
+    PACS_R,
+    # WISE
+    WISE1,
+    WISE2,
+    WISE3,
+    WISE4
+]
+
+def validbands(): 
+    return _valid_bands
+
 
 class Band():
     """
@@ -320,10 +384,10 @@ class FilterSetManager():
 class Photometry():
     "A single photometric point"
     def __init__(self,bandname,flux,error,validity,unit=None):
+       if bandname not in _valid_bands:
+          raise Warning("Unrecognized band name %s. Will not be able to convert between flux density and magnitude." % bandname)
        self._bandname = bandname
-       #@todo check that flux and error have same units
-       #@todo check that flux and error are magnitude or jansky
-       # def isFlux /def isMagnitude
+
        if isQuantity(flux):
            self._flux = flux
        else:
@@ -338,31 +402,33 @@ class Photometry():
                raise Exception("error must be a Magnitude or Flux Density Quantity")
            else:
                self._error = error*unit
+
+       if not ((isFluxDensity(self._flux) and isFluxDensity(self._error)) or (isMagnitue(self._flux) and isMagnitude(self._error))):
+               raise Exception("flux and error must be a Magnitude or Flux Density Quantity and have equivalent units")
+
        self._validity = validity
 
-     def band(self):
-         return self._bandname
+    def band(self):
+        return self._bandname
 
-     def flux(self):
-         return self._flux
+    def flux(self):
+        return self._flux
 
-     def validity(self):
-         return self._validity
+    def error(self):
+        return self._error
 
-     def error(self):
-         return self._error
+    def validity(self):
+        return self._validity
 
-     def units(self):
-         return "whatever astropy quanitity units accessor is"
+    def units(self):
+        return self._flux.unit
 
 class PhotometryManager():
     def __init__(self):
        self._photometry = dict()
 
     def addData(self,bandname,flux,error,validity,unit=None):
-       #@todo check that bandname is one of our list above.
-       # def isValidBandname()
-       self._photometry[bandname] = Photometry(bandname,flux,error,validity,unit)
+       self._photometry[bandname.lower()] = Photometry(bandname,flux,error,validity,unit)
           
 
 #### EXAMPLE USAGE ####
@@ -389,3 +455,7 @@ if __name__ == "__main__":
        #SDSS = enum.Enum(SLOAN, "u g r i z")
        #print(SDSS.u.value)
        #print(SDSS.u.name)
+
+       pm = PhotometryManager()
+       pm.addData("2J",q, q/100.0,1)
+       pm.addData("3J",q, q/100.0,1)
