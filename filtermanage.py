@@ -3,38 +3,14 @@
 # Module to manage bands (filters) and filtersets
 # E.g. convert magnitude to flux and vice versa for various wavebands.
 #
-# Additional wavebands can be added easily.
-# MWP - Tue Jul 24 13:39:14 EDT 2018
 #
+import warnings
 import numpy as np
-import enum
+#import enum
 from astropy import units as u
 from astropy.units.quantity import Quantity
+import quantityhelpers as qh
 
-def isQuantity(q):
-   """Test if input is an Astropy Quantity object
-      Parameters: 
-        q - input object to test
-   """
-   return type(q) == Quantity
-
-def isFluxDensity(q):
-   """Test if input is an Astropy Quantity with units of flux density
-      Parameters: 
-        q - input object to test
-   """
-   if isQuantity(q):
-       return q.unit.is_equivalent("Jy")
-   return False
-
-def isMagnitude(q):
-   """Test if input is an Astropy Quantity with units of astronomical magnitude
-      Parameters: 
-        q - input object to test
-   """
-   if isQuantity(q):
-       return q.unit.is_equivalent("mag")
-   return False
 
 """Telescope names"""
 SDSS     = "SDSS"
@@ -44,6 +20,8 @@ GAIA     = "GAIA"
 HERSCHEL = "Herschel"
 TWOMASS  = "2MASS"
 WISE     = "WISE"
+BESSEL   = "Bessel" # really a filter name
+JOHNSON  = "Bessel" # yes it is the same as BESSEL
 
 
 """Photometric band names. Where common, use same names as SedFitter code (Robitaille)"""
@@ -90,50 +68,51 @@ WISE2  = "WISE2"
 WISE3  = "WISE3"
 WISE4  = "WISE4"
 
-_valid_bands = [
+# can be used to reverse lookup the telescop
+_valid_bands = {
     # Sloan
-    SDSS_u,
-    SDSS_g,
-    SDSS_r,
-    SDSS_i,
-    SDSS_z,
+    SDSS_u:SLOAN,
+    SDSS_g:SLOAN,
+    SDSS_r:SLOAN,
+    SDSS_i:SLOAN,
+    SDSS_z:SLOAN,
     # Bessel UVBRI
-    U,
-    B,
-    V,
-    R,
-    I,
-    GAIA_G,
-    GAIA_B,
-    GAIA_R,
+    U:BESSEL,
+    B:BESSEL,
+    V:BESSEL,
+    R:BESSEL,
+    I:BESSEL,
+    GAIA_G:GAIA,
+    GAIA_B:GAIA,
+    GAIA_R:GAIA,
     # 2MASS
-    TWOMASS_J,
-    TWOMASS_H,
-    TWOMASS_K,
+    TWOMASS_J:TWOMASS,
+    TWOMASS_H:TWOMASS,
+    TWOMASS_K:TWOMASS,
     #DENIS_I,
     #USNO_B,
     #USNO_R,
     # Spitzer
-    IRAC1,
-    IRAC2,
-    IRAC3,
-    IRAC4,
-    MIPS1,
-    MIPS2,
-    MIPS3,
+    IRAC1:SPITZER,
+    IRAC2:SPITZER,
+    IRAC3:SPITZER,
+    IRAC4:SPITZER,
+    MIPS1:SPITZER,
+    MIPS2:SPITZER,
+    MIPS3:SPITZER,
     # Herschel
-    PACS_B,
-    PACS_G,
-    PACS_R,
+    PACS_B:HERSCHEL,
+    PACS_G:HERSCHEL,
+    PACS_R:HERSCHEL,
     # WISE
-    WISE1,
-    WISE2,
-    WISE3,
-    WISE4
-]
+    WISE1:WISE,
+    WISE2:WISE,
+    WISE3:WISE,
+    WISE4:WISE
+}
 
 def validbands(): 
-    return _valid_bands
+    return _valid_bands.keys()
 
 
 class Band():
@@ -150,11 +129,11 @@ class Band():
        # canonical name
        self._name = name
        # mean wavelength
-       if not isQuantity(wavelength):
+       if not qh.isQuantity(wavelength):
           raise Exception("Wavelength must be an astropy Quantity")
-       if not isQuantity(bandwidth):
+       if not qh.isQuantity(bandwidth):
           raise Exception("Wavelength must be an astropy Quantity")
-       if not isQuantity(zeropoint):
+       if not qh.isQuantity(zeropoint):
           raise Exception("Wavelength must be an astropy Quantity")
 
        # Check that units of inputs are correct dimensions.
@@ -352,7 +331,7 @@ class FilterSetManager():
              mjy       - boolean to return flux in mJy. True returns mJy, False returns Jy. Default:True
        """
        zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
-       if isQuantity(magnitude):
+       if qh.isQuantity(magnitude):
            value = zpjy*10.0**(magnitude.value/-2.5)
        else:
            value = zpjy*10.0**(magnitude/-2.5)
@@ -374,7 +353,7 @@ class FilterSetManager():
              mjy       - boolean, True if flux was given in mJy False if Jy. Ignored if flux is given as Quantity
        """
        zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
-       if isQuantity(flux):
+       if qh.isQuantity(flux):
            fval = flux.to(u.Jy).value
        else:
            if mjy==True: fval = flux / 1000.0
@@ -382,20 +361,21 @@ class FilterSetManager():
        return u.Magnitude(-2.5*np.log10(fval/zpjy.value))
 
 class Photometry():
+#@todo deal with masked values
     "A single photometric point"
     def __init__(self,bandname,flux,error,validity,unit=None):
        if bandname not in _valid_bands:
-          raise Warning("Unrecognized band name %s. Will not be able to convert between flux density and magnitude." % bandname)
+          warnings.warn("Unrecognized band name %s. Will not be able to convert between flux density and magnitude." % bandname)
        self._bandname = bandname
 
-       if isQuantity(flux):
+       if qh.isQuantity(flux):
            self._flux = flux
        else:
            if unit == None:
                raise Exception("flux or unit must be a Magnitude or Flux Density Quantity")
            else:
                self._flux = flux*unit
-       if isQuantity(error):
+       if qh.isQuantity(error):
            self._error = error 
        else:
            if unit == None:
@@ -403,33 +383,72 @@ class Photometry():
            else:
                self._error = error*unit
 
-       if not ((isFluxDensity(self._flux) and isFluxDensity(self._error)) or (isMagnitue(self._flux) and isMagnitude(self._error))):
+       if not ((qh.isFluxDensity(self._flux) and qh.isFluxDensity(self._error)) or (qh.isMagnitude(self._flux) and qh.isMagnitude(self._error))):
                raise Exception("flux and error must be a Magnitude or Flux Density Quantity and have equivalent units")
 
        self._validity = validity
 
+    @property
     def band(self):
         return self._bandname
 
+    @property
     def flux(self):
-        return self._flux
+        """return flux as flux density quantity"""
+        if qh.isMagnitude(self._flux):
+            tel = _valid_bands[self._bandname]
+            return magtoflux(tel,self._bandname,self._flux) 
+        else:
+            return self._flux
 
+    def mjy(self):
+        return self.flux.to(u.mJy).value
+
+    @property
+    def magnitude(self):
+        """return flux as magnitude quantity"""
+        if qh.isFluxDensity(self._flux):
+            tel = _valid_bands[self._bandname]
+            return fluxtomag(tel,self._bandname,self._flux) 
+        else:
+            return self._flux
+
+    @property
     def error(self):
-        return self._error
+        """return error as flux density quantity"""
+        if qh.isMagnitude(self._error):
+            tel = _valid_bands[self._bandname]
+            return magtoflux(tel,self._bandname,self._error) 
+        else:
+            return self._error
 
+    def errormag(self):
+        """return error as magnitude quantity"""
+        if qh.isFluxDensity(self._error):
+            tel = _valid_bands[self._bandname]
+            return fluxtomag(tel,self._bandname,self._error) 
+        else:
+            return self._error
+
+    def errormjy(self):
+        """return error in millijanskies as a scalar"""
+        if qh.isMagnitude(self._error):
+            tel = _valid_bands[self._bandname]
+            return magtoflux(tel,self._bandname,self.error).to(u.mJy).value 
+        else:
+            return self._error.to(u.mJy).value
+
+    @property
     def validity(self):
         return self._validity
+    
+    def setvalidity(self,validity):
+        self._validity = validity
 
+    @property
     def units(self):
         return self._flux.unit
 
-class PhotometryManager():
-    def __init__(self):
-       self._photometry = dict()
-
-    def addData(self,bandname,flux,error,validity,unit=None):
-       self._photometry[bandname.lower()] = Photometry(bandname,flux,error,validity,unit)
-          
 
 #### EXAMPLE USAGE ####
 if __name__ == "__main__":
@@ -456,6 +475,3 @@ if __name__ == "__main__":
        #print(SDSS.u.value)
        #print(SDSS.u.name)
 
-       pm = PhotometryManager()
-       pm.addData("2J",q, q/100.0,1)
-       pm.addData("3J",q, q/100.0,1)
