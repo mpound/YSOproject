@@ -20,8 +20,7 @@ GAIA     = "GAIA"
 HERSCHEL = "Herschel"
 TWOMASS  = "2MASS"
 WISE     = "WISE"
-BESSEL   = "Bessel" # really a filter name
-JOHNSON  = "Bessel" # yes it is the same as BESSEL
+GENERIC  = "Generic" # This is a guess as to which Bessel filter set Robitaille used.  They are slightly different for different telescopes
 
 
 """Photometric band names. Where common, use same names as SedFitter code (Robitaille)"""
@@ -34,11 +33,11 @@ SDSS_r = "r"
 SDSS_i = "i"
 SDSS_z = "z"
 # Bessel UVBRI
-U       = "BU"
-B       = "BB"
-V       = "BV"
-R       = "BR"
-I       = "BI"
+BESSEL_U  = "BU"
+BESSEL_B  = "BB"
+BESSEL_V  = "BV"
+BESSEL_R  = "BR"
+BESSEL_I  = "BI"
 # GAIA
 GAIA_G  = "G"
 GAIA_B  = "BP"
@@ -77,11 +76,11 @@ _valid_bands = {
     SDSS_i:SLOAN,
     SDSS_z:SLOAN,
     # Bessel UVBRI
-    U:BESSEL,
-    B:BESSEL,
-    V:BESSEL,
-    R:BESSEL,
-    I:BESSEL,
+    BESSEL_U:GENERIC,
+    BESSEL_B:GENERIC,
+    BESSEL_V:GENERIC,
+    BESSEL_R:GENERIC,
+    BESSEL_I:GENERIC,
     GAIA_G:GAIA,
     GAIA_B:GAIA,
     GAIA_R:GAIA,
@@ -224,6 +223,13 @@ sloan    = [Band(SDSS_u, 3561.8*u.angstrom,  558.4*u.angstrom, 1568.5*u.jansky),
             Band(SDSS_z, 8961.5*u.angstrom, 1124.6*u.angstrom, 2244.7*u.jansky)
            ]
 
+# Generic
+bessel  = [Band(BESSEL_U, 3605.1*u.angstrom,  640.4*u.angstrom, 1803.1*u.jansky),
+           Band(BESSEL_B, 4400.0*u.angstrom,  900.0*u.angstrom, 4000.0*u.jansky),
+           Band(BESSEL_V, 5312.1*u.angstrom,  893.1*u.angstrom, 3579.8*u.jansky),
+           Band(BESSEL_R, 6575.9*u.angstrom, 1591.0*u.angstrom, 2971.4*u.jansky),
+           Band(BESSEL_I, 8059.9*u.angstrom, 1495.1*u.angstrom, 2405.3*u.jansky)
+          ]
 # Gaia 2nd Release (GAIA2r) values
 gaia    = [Band(GAIA_B, 5278.6*u.angstrom, 2279.4*u.angstrom, 3393.3*u.jansky),
            Band(GAIA_G, 6773.7*u.angstrom, 4358.4*u.angstrom, 2835.1*u.jansky),
@@ -259,8 +265,8 @@ wise     = [Band(WISE1,33526.0*u.angstrom, 6626.4*u.angstrom,  309.5*u.jansky),
            ]
 
 # add any new FilterSets to this list
-all_filtersets = [ sloan, gaia, twomass, spitzer, herschel, wise ]
-all_names      = [ SLOAN, GAIA, TWOMASS, SPITZER, HERSCHEL, WISE ]
+all_filtersets = [ sloan, gaia, bessel, twomass, spitzer, herschel, wise ]
+all_names      = [ SLOAN, GAIA, GENERIC, TWOMASS, SPITZER, HERSCHEL, WISE ]
 
 
 ######################################################################################
@@ -331,7 +337,8 @@ class FilterSetManager():
              mjy       - boolean to return flux in mJy. True returns mJy, False returns Jy. Default:True
        """
        zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
-       if qh.isQuantity(magnitude):
+       #print("TBM: %s %s %s"%(telescope,band,magnitude))
+       if qh.isMagnitude(magnitude):
            value = zpjy*10.0**(magnitude.value/-2.5)
        else:
            value = zpjy*10.0**(magnitude/-2.5)
@@ -368,14 +375,14 @@ class Photometry():
           warnings.warn("Unrecognized band name %s. Will not be able to convert between flux density and magnitude." % bandname)
        self._bandname = bandname
 
-       if qh.isQuantity(flux):
+       if qh.isFluxDensity(flux) or qh.isMagnitude(flux):
            self._flux = flux
        else:
            if unit == None:
                raise Exception("flux or unit must be a Magnitude or Flux Density Quantity")
            else:
                self._flux = flux*unit
-       if qh.isQuantity(error):
+       if qh.isFluxDensity(error) or qh.isMagnitude(error):
            self._error = error 
        else:
            if unit == None:
@@ -387,6 +394,7 @@ class Photometry():
                raise Exception("flux and error must be a Magnitude or Flux Density Quantity and have equivalent units")
 
        self._validity = validity
+       self._fsm      = FilterSetManager()
 
     @property
     def band(self):
@@ -397,7 +405,7 @@ class Photometry():
         """return flux as flux density quantity"""
         if qh.isMagnitude(self._flux):
             tel = _valid_bands[self._bandname]
-            return magtoflux(tel,self._bandname,self._flux) 
+            return self._fsm.magtoflux(tel,self._bandname,self._flux) 
         else:
             return self._flux
 
@@ -409,7 +417,7 @@ class Photometry():
         """return flux as magnitude quantity"""
         if qh.isFluxDensity(self._flux):
             tel = _valid_bands[self._bandname]
-            return fluxtomag(tel,self._bandname,self._flux) 
+            return self._fsm.fluxtomag(tel,self._bandname,self._flux) 
         else:
             return self._flux
 
@@ -418,7 +426,7 @@ class Photometry():
         """return error as flux density quantity"""
         if qh.isMagnitude(self._error):
             tel = _valid_bands[self._bandname]
-            return magtoflux(tel,self._bandname,self._error) 
+            return self._fsm.magtoflux(tel,self._bandname,self._error) 
         else:
             return self._error
 
@@ -426,7 +434,7 @@ class Photometry():
         """return error as magnitude quantity"""
         if qh.isFluxDensity(self._error):
             tel = _valid_bands[self._bandname]
-            return fluxtomag(tel,self._bandname,self._error) 
+            return self._fsm.fluxtomag(tel,self._bandname,self._error) 
         else:
             return self._error
 
@@ -434,7 +442,7 @@ class Photometry():
         """return error in millijanskies as a scalar"""
         if qh.isMagnitude(self._error):
             tel = _valid_bands[self._bandname]
-            return magtoflux(tel,self._bandname,self.error).to(u.mJy).value 
+            return self._fsm.magtoflux(tel,self._bandname,self._error).to(u.mJy).value 
         else:
             return self._error.to(u.mJy).value
 
