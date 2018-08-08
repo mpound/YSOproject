@@ -1,0 +1,8 @@
+# Compiled files
+*.py[co]
+*.a
+*.o
+*.so
+__pycache__
+
+#       .ipynb_checkpoints/
