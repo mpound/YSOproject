@@ -41,8 +41,10 @@ class SED():
 
     def sedfitterinput(self):
        """Return this SED as an input source for SEDFitter code"""
-       line = self.header() + "\n"
-       line += "%s  %.3e  %.3e" % ( self._name, self._coord.ra.degree, self._coord.dec.degree )
+       #line = self.header() + "\n"
+       # SEDfitter doesn't want spaces in names
+       nospacename = self._name.replace(' ','_')
+       line = "%s  %.3e  %.3e" % ( nospacename, self._coord.ra.degree, self._coord.dec.degree )
        photline = " "
        for p in self._photometry.values():
            photline+="%d "%p.validity
@@ -67,3 +69,7 @@ if __name__ == "__main__":
        pm.addData(fm.SDSS_u,q/100, q/1000.0,0)
        print(pm.sedfitterinput())
 
+       g = u.Magnitude(10)
+       print(g)
+       print(g.unit)
+       print(qh.isMagnitude(g))
