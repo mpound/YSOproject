@@ -27,6 +27,7 @@ def isMagnitude(q):
       Parameters: 
         q - input object to test
    """
-   if isQuantity(q):
+   try:
        return q.unit.is_equivalent("mag")
-   return False
+   except Exception:
+       return False
