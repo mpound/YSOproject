@@ -11,11 +11,11 @@ cols = [
         (fm.SDSS_r,"r","rms_r"),
         (fm.SDSS_i,"i","rms_i"),
         (fm.SDSS_z,"z","rms_z"),
-        (fm.U,"FLUX_U","FLUX_ERROR_U"),
-        (fm.B,"FLUX_B","FLUX_ERROR_B"),
-        (fm.V,"FLUX_V","FLUX_ERROR_V"),
-        (fm.R,"FLUX_R","FLUX_ERROR_R"),
-        (fm.I,"FLUX_I","FLUX_ERROR_I"),
+        (fm.BESSEL_U,"FLUX_U","FLUX_ERROR_U"),
+        (fm.BESSEL_B,"FLUX_B","FLUX_ERROR_B"),
+        (fm.BESSEL_V,"FLUX_V","FLUX_ERROR_V"),
+        (fm.BESSEL_R,"FLUX_R","FLUX_ERROR_R"),
+        (fm.BESSEL_I,"FLUX_I","FLUX_ERROR_I"),
         (fm.TWOMASS_J,"FLUX_J","FLUX_ERROR_J"),
         (fm.TWOMASS_H,"FLUX_H","FLUX_ERROR_H"),
         (fm.TWOMASS_H,"FLUX_K","FLUX_ERROR_K")
@@ -30,7 +30,7 @@ for i in tfinal:
     for c in cols:
         s.addData(c[0],u.Magnitude(i[c[1]]),u.Magnitude(i[c[2]]),1)
     seds.append(s)
-
+print(seds[0].header())
 for s in seds:
-    s.sedfitterinput()
+    print(s.sedfitterinput())
 
