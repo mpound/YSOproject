@@ -8,15 +8,20 @@ import quantityhelpers as qh
 
 class SED():
     """Simple spectral energy distribution class for input into SEDFitter"""
-    def __init__(self,name,distance,ra=0*u.degree,dec=0*u.degree):
+    def __init__(self,name,distance,disterr,ra=0*u.degree,dec=0*u.degree):
        if not qh.isLength(distance):
           raise Exception("distance must be an Astropy Quantity with units length")
+       if not qh.isLength(disterr[0]):
+          raise Exception("minus distance error must be an Astropy Quantity with units length")
+       if not qh.isLength(disterr[1]):
+          raise Exception("plus distance error must be an Astropy Quantity with units length")
        if not qh.isQuantity(ra):
           raise Exception("Right Ascension must be an Astropy Quantity")
        if not qh.isQuantity(dec):
           raise Exception("Declination must be an Astropy Quantity")
        self._name     = name
        self._distance = distance
+       self._disterr= disterr
        self._coord = coord.ICRS(ra=ra,dec=dec)
        self._photometry = dict()
 
@@ -38,6 +43,19 @@ class SED():
        for p in self._photometry.values():
            line += " %s" % p.band
        return line
+
+    def wavelengths(self):
+       w = []
+       for s in self._photometry.values():
+           z = s.wavelength.to(u.micron).value
+           w.append(z)
+       return w*u.micron
+
+    def fluxes(self):
+       f = []
+       for s in self._photometry.values():
+           f.append(s.mjy())
+       return f*u.mJy
 
     def sedfitterinput(self):
        """Return this SED as an input source for SEDFitter code"""

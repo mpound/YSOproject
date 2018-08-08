@@ -10,6 +10,7 @@ import numpy as np
 from astropy import units as u
 from astropy.units.quantity import Quantity
 import quantityhelpers as qh
+import math
 
 
 """Telescope names"""
@@ -337,7 +338,7 @@ class FilterSetManager():
              mjy       - boolean to return flux in mJy. True returns mJy, False returns Jy. Default:True
        """
        zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
-       #print("TBM: %s %s %s"%(telescope,band,magnitude))
+       #print("TBM: %s %s %s %s"%(telescope,band,magnitude,zpjy))
        if qh.isMagnitude(magnitude):
            value = zpjy*10.0**(magnitude.value/-2.5)
        else:
@@ -401,10 +402,15 @@ class Photometry():
         return self._bandname
 
     @property
+    def wavelength(self):
+        tel = _valid_bands[self._bandname].lower()
+        return self._fsm.wavelength(tel,self._bandname)
+
+    @property
     def flux(self):
         """return flux as flux density quantity"""
         if qh.isMagnitude(self._flux):
-            tel = _valid_bands[self._bandname]
+            tel = _valid_bands[self._bandname].lower()
             return self._fsm.magtoflux(tel,self._bandname,self._flux) 
         else:
             return self._flux
@@ -416,7 +422,7 @@ class Photometry():
     def magnitude(self):
         """return flux as magnitude quantity"""
         if qh.isFluxDensity(self._flux):
-            tel = _valid_bands[self._bandname]
+            tel = _valid_bands[self._bandname].lower()
             return self._fsm.fluxtomag(tel,self._bandname,self._flux) 
         else:
             return self._flux
@@ -425,7 +431,7 @@ class Photometry():
     def error(self):
         """return error as flux density quantity"""
         if qh.isMagnitude(self._error):
-            tel = _valid_bands[self._bandname]
+            tel = _valid_bands[self._bandname].lower()
             return self._fsm.magtoflux(tel,self._bandname,self._error) 
         else:
             return self._error
@@ -433,16 +439,21 @@ class Photometry():
     def errormag(self):
         """return error as magnitude quantity"""
         if qh.isFluxDensity(self._error):
-            tel = _valid_bands[self._bandname]
-            return self._fsm.fluxtomag(tel,self._bandname,self._error) 
+            NtoS = self._error/self._flux
+            magerror = 2.5*math.log10(1.0+NtoS)
+            return u.Magnitude(magerror)
         else:
             return self._error
 
     def errormjy(self):
         """return error in millijanskies as a scalar"""
         if qh.isMagnitude(self._error):
-            tel = _valid_bands[self._bandname]
-            return self._fsm.magtoflux(tel,self._bandname,self._error).to(u.mJy).value 
+            NtoS = 10.0**(self._error.value/2.5)-1.0
+            tel = _valid_bands[self._bandname].lower()
+            fluxmjy=  self._fsm.magtoflux(tel,self._bandname,self._flux)
+            errormjy = fluxmjy * NtoS
+#            print("tel %s, band %s, error %s, NtoS %s fluxmjy %s errormjy %s"%(tel,self._bandname,self._error, NtoS,fluxmjy,errormjy))
+            return errormjy.to(u.mJy).value 
         else:
             return self._error.to(u.mJy).value
 
@@ -473,12 +484,14 @@ if __name__ == "__main__":
 
        m = fsm.fluxtomag(SLOAN,SDSS_u,156.85,mjy=True)
        # magnitude Quantity 
-       print(m) 
+       print("Should be 10:",m) 
 
        # example using Quantity instead of scalar value input
        q = 1000*u.mJy
        m = fsm.fluxtomag(SPITZER,MIPS1,q)
        print(m)
+       f = fsm.magtoflux(SLOAN,SDSS_u,0.0214)
+       print(f)
        #SDSS = enum.Enum(SLOAN, "u g r i z")
        #print(SDSS.u.value)
        #print(SDSS.u.name)
