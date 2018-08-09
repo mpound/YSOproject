@@ -46,23 +46,38 @@ fullfname = 'catalog-SERAQU_%d-FULL.tbl'
 # have selected the one square degree from.  Similary Gb-Full Region 6.
 indx = range(1,7)
 
-ysotables = list()
-for i in indx:
-    print(GBysodir+ysofname%(i))
-    f=GBysodir+ysofname%(i)
-    t =Table.read(f,format='ipac')
-    ysotables.append(t)
-    #plt.plot(t['ra']*u.degree,t['dec']*u.degree)
-
-# concatenate all the tables
-allyso = vstack(ysotables)
-#plt.scatter(allyso['ra']*u.degree,allyso['dec']*u.degree)
-#plt.xlim(280.5,276.0)
-#plt.ylim(-5,2)
 plt.xlim(280.5,278.5)
 plt.ylim(-0.5,1)
 plt.axes().set_aspect('equal')
-plt.scatter(ysotables[5]['ra'],ysotables[5]['dec'],color='orange',s=3)
+
+concat = False
+if concat:
+    ysotables = list()
+    for i in indx:
+        print(GBysodir+ysofname%(i))
+        f=GBysodir+ysofname%(i)
+        t =Table.read(f,format='ipac')
+        ysotables.append(t)
+        #plt.plot(t['ra']*u.degree,t['dec']*u.degree)
+
+    # concatenate all the tables
+    allyso = vstack(ysotables)
+    plt.scatter(ysotables[5]['ra'],ysotables[5]['dec'],color='orange',s=3)
+    df = allyso.to_pandas()
+    df = df[(df.ra <= 280.25)& (df.ra >= 279.25) & (df.dec >= -0.25) & (df.dec <= 0.75)]
+    mytable = Table.from_pandas(df)
+    print("Serpens East YSOc sources: %d"%len(mytable))
+    mytable.write("catalog-SerpensEast_GB_YSOc.tbl",format="ipac")
+    df = df[(df.Prob_Galc >= -0.6)]
+    print("Selected serpens east %d lines  PG >= -0.6" % len(df))
+else:
+    yso = Table.read("catalog-SerpensEast_GB_YSOc.tbl",format="ipac")
+    print("Serpens East YSOc sources: %d {orange}"%len(yso))
+    df = yso.to_pandas()
+    df = df[(df.Prob_Galc >= -0.6)]
+    print("Selected serpens east %d lines  PG >= -0.6" % len(df))
+    plt.scatter(yso['ra'],yso['dec'],color='orange',s=3)
+
 
 readbigtable = False
 if readbigtable:
@@ -72,12 +87,20 @@ if readbigtable:
     print("Read %d lines" % len(bigtable))
     # make a pandas dataframe to more easily select the data we want
     df=bigtable.to_pandas()
-    df = df[(df.Prob_Galc > -1.47) & (df.Prob_Galc < -0.6)]
-    print("Selected %d lines" % len(df))
-    smalltable = Table.from_pandas(df)
-    ascii.write(smalltable,'catalog-SERAQU_6_ProbGalc.tbl',format='ipac')
+    xdf = df[(df.Prob_Galc > -1.47) & (df.Prob_Galc < -0.6)]
+    print("Selected %d lines [-1.47 < PG < -0.6" % len(xdf))
+    smalltable = Table.from_pandas(xdf)
+    ascii.write(smalltable,'catalog-SERAQU_6_ProbGalc_-1.47to-0.6.tbl',format='ipac')
+    xxdf = df[(df.Prob_Galc >= -0.6)]
+    xsmalltable = Table.from_pandas(xxdf)
+    print("Selected %d lines [PG >= -0.6]" % len(xxdf))
+    ascii.write(xsmalltable,'catalog-SERAQU_6_ProbGalc_ge_-0.6.tbl',format='ipac')
 else:
-    smalltable = Table.read('catalog-SERAQU_6_ProbGalc.tbl',format='ipac')
-plt.scatter(smalltable['ra'],smalltable['dec'],color='blue',s=3)
+    xsmalltable = Table.read('catalog-SERAQU_6_ProbGalc_ge_-0.6.tbl',format='ipac')
+    smalltable = Table.read('catalog-SERAQU_6_ProbGalc_-1.47to-0.6.tbl',format='ipac')
+    print("Selected %d lines [-1.47 < PG < -0.6] {blue}" % len(smalltable))
+    print("Selected %d lines [PG >= -0.6] {red - galaxies!}" % len(xsmalltable))
+plt.scatter(smalltable['ra'],smalltable['dec'],color='blue',s=25,facecolor='none')
+plt.scatter(xsmalltable['ra'],xsmalltable['dec'],color='red',s=25,facecolor='none')
 plt.show()
 

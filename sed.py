@@ -26,6 +26,9 @@ class SED():
        self._photometry = dict()
 
     def addData(self,bandname,flux,error,validity,unit=None):
+       if (np.ma.is_masked(flux) or np.ma.is_masked(error)) and validity != 0:
+          print("flux and/or error is masked for Source %s band %s but validity is non-zero...skipping."%(self._name,bandname))
+          return
        self._photometry[bandname.lower()] = Photometry(bandname,flux,error,validity,unit)
 
     def setvalidity(self,bandname,validity):
@@ -43,6 +46,12 @@ class SED():
        for p in self._photometry.values():
            line += " %s" % p.band
        return line
+
+#       w = ma.masked_array(np.zeros(len(self._photometry))
+#       for i,s in enumerate(self._photometry.values(),0):
+#           w[i] = s.wavelength.to(u.micron).value
+#           if s.validity == 0:
+#              w[i].mask == False
 
     def wavelengths(self):
        w = []

@@ -28,21 +28,21 @@ GENERIC  = "Generic" # This is a guess as to which Bessel filter set Robitaille 
 # @Todo Replace all these with Enums?
 #SDSS = Enum(SLOAN, "u g r i z")
 # Sloan Digital Sky Survey
-SDSS_u = "u"
-SDSS_g = "g"
-SDSS_r = "r"
-SDSS_i = "i"
-SDSS_z = "z"
+SDSS_u = "SDSS_u"
+SDSS_g = "SDSS_g"
+SDSS_r = "SDSS_r"
+SDSS_i = "SDSS_i"
+SDSS_z = "SDSS_z"
 # Bessel UVBRI
-BESSEL_U  = "BU"
-BESSEL_B  = "BB"
-BESSEL_V  = "BV"
-BESSEL_R  = "BR"
-BESSEL_I  = "BI"
+BESSELL_U  = "BU"
+BESSELL_B  = "BB"
+BESSELL_V  = "BV"
+BESSELL_R  = "BR"
+BESSELL_I  = "BI"
 # GAIA
-GAIA_G  = "G"
-GAIA_B  = "BP"
-GAIA_R  = "RP"
+GAIA_G  = "GAIA_G"
+GAIA_B  = "GAIA_BP"
+GAIA_R  = "GAIA_RP"
 # 2MASS
 TWOMASS_J = "2J"
 TWOMASS_H = "2H"
@@ -77,11 +77,11 @@ _valid_bands = {
     SDSS_i:SLOAN,
     SDSS_z:SLOAN,
     # Bessel UVBRI
-    BESSEL_U:GENERIC,
-    BESSEL_B:GENERIC,
-    BESSEL_V:GENERIC,
-    BESSEL_R:GENERIC,
-    BESSEL_I:GENERIC,
+    BESSELL_U:GENERIC,
+    BESSELL_B:GENERIC,
+    BESSELL_V:GENERIC,
+    BESSELL_R:GENERIC,
+    BESSELL_I:GENERIC,
     GAIA_G:GAIA,
     GAIA_B:GAIA,
     GAIA_R:GAIA,
@@ -225,11 +225,11 @@ sloan    = [Band(SDSS_u, 3561.8*u.angstrom,  558.4*u.angstrom, 1568.5*u.jansky),
            ]
 
 # Generic
-bessel  = [Band(BESSEL_U, 3605.1*u.angstrom,  640.4*u.angstrom, 1803.1*u.jansky),
-           Band(BESSEL_B, 4400.0*u.angstrom,  900.0*u.angstrom, 4000.0*u.jansky),
-           Band(BESSEL_V, 5312.1*u.angstrom,  893.1*u.angstrom, 3579.8*u.jansky),
-           Band(BESSEL_R, 6575.9*u.angstrom, 1591.0*u.angstrom, 2971.4*u.jansky),
-           Band(BESSEL_I, 8059.9*u.angstrom, 1495.1*u.angstrom, 2405.3*u.jansky)
+bessel  = [Band(BESSELL_U, 3605.1*u.angstrom,  640.4*u.angstrom, 1803.1*u.jansky),
+           Band(BESSELL_B, 4400.0*u.angstrom,  900.0*u.angstrom, 4000.0*u.jansky),
+           Band(BESSELL_V, 5312.1*u.angstrom,  893.1*u.angstrom, 3579.8*u.jansky),
+           Band(BESSELL_R, 6575.9*u.angstrom, 1591.0*u.angstrom, 2971.4*u.jansky),
+           Band(BESSELL_I, 8059.9*u.angstrom, 1495.1*u.angstrom, 2405.3*u.jansky)
           ]
 # Gaia 2nd Release (GAIA2r) values
 gaia    = [Band(GAIA_B, 5278.6*u.angstrom, 2279.4*u.angstrom, 3393.3*u.jansky),
@@ -325,7 +325,7 @@ class FilterSetManager():
        return self._filtersets[filterset][band].bw()
 
     # Return given (milli)jansky
-    # Example: magtoflux("sloan","u",10)  returns 156.85 mJy 
+    # Example: magtoflux("sloan","SDSS_u",10)  returns 156.85 mJy 
     # @returns astropy Quantity with units u.mJy or u.Jy
     def magtoflux(self,telescope,band,magnitude,mjy=True):
        """Return the flux density in Jansky or milliJansky of a source as an astropy Quantity, 
@@ -349,7 +349,7 @@ class FilterSetManager():
            return value.to(Jy)
 
     # Return magnitude given jansky
-    # Example: fluxtomag("sloan","u",156.85)  returns 10 mag
+    # Example: fluxtomag("sloan","SDSS_u",156.85)  returns 10 mag
     # @returns astropy Quantity with units u.Magnitude)
     def fluxtomag(self,telescope,band,flux,mjy=True):
        """Return the magnitude given flux in Jansky as magnitude astropy Quantity.
