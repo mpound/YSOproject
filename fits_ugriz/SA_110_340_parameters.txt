@@ -1,0 +1,5 @@
+         source_name             n_data     n_fits   
+  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
+----------------------------------------------------------------------------------------------------------------------------------
+                    SA_110_340          5          1 
+         1                    uoNaIFIT_01  18975.106      0.500     -0.532  1.376e+00  8.358e+03  1.000e+00  4.500e+01 

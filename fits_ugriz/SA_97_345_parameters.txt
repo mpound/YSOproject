@@ -1,0 +1,5 @@
+         source_name             n_data     n_fits   
+  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
+----------------------------------------------------------------------------------------------------------------------------------
+                     SA_97_345          5          1 
+         1                    qbBDwfhi_01  26275.089      0.785     -0.260  8.537e+00  4.200e+03  1.000e+00  4.500e+01 

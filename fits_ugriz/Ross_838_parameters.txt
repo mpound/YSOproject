@@ -1,0 +1,5 @@
+         source_name             n_data     n_fits   
+  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
+----------------------------------------------------------------------------------------------------------------------------------
+                      Ross_838          5          1 
+         1                    DnKpVk24_01  12568.783      0.012     -0.963  5.277e-01  5.498e+03  1.000e+00  4.500e+01 

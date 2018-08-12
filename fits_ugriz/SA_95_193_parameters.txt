@@ -1,0 +1,5 @@
+         source_name             n_data     n_fits   
+  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
+----------------------------------------------------------------------------------------------------------------------------------
+                     SA_95_193          5          1 
+         1                    QXR7rBCV_01   4773.408      0.035     -0.613  6.391e-01  4.434e+03  1.000e+00  4.500e+01 

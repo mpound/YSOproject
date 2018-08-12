@@ -1,0 +1,5 @@
+         source_name             n_data     n_fits   
+  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
+----------------------------------------------------------------------------------------------------------------------------------
+                     SA_98_653          5          1 
+         1                    64gPQbSw_01  24028.992      0.000      0.028  4.172e+00  9.508e+03  1.000e+00  4.500e+01 

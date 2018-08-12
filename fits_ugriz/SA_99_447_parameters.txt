@@ -1,0 +1,5 @@
+         source_name             n_data     n_fits   
+  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
+----------------------------------------------------------------------------------------------------------------------------------
+                     SA_99_447          5          1 
+         1                    lq0tP5PX_01  13870.325      0.000     -0.248  2.383e+00  9.186e+03  1.000e+00  4.500e+01 
