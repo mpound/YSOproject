@@ -18,6 +18,8 @@ SDSS     = "SDSS"
 SLOAN    = "SDSS"
 SPITZER  = "Spitzer"
 GAIA     = "GAIA"
+GAIA2     = "GAIA2"
+GAIA2r     = "GAIA2r"
 HERSCHEL = "Herschel"
 TWOMASS  = "2MASS"
 WISE     = "WISE"
@@ -40,9 +42,12 @@ BESSELL_V  = "BV"
 BESSELL_R  = "BR"
 BESSELL_I  = "BI"
 # GAIA
-GAIA_G  = "GAIA_G"
-GAIA_B  = "GAIA_BP"
-GAIA_R  = "GAIA_RP"
+GAIA_G2  = "GAIA_G2"
+GAIA_B2  = "GAIA_BP2"
+GAIA_R2  = "GAIA_RP2"
+GAIA_G2r  = "GAIA_G2r"
+GAIA_B2r  = "GAIA_BP2r"
+GAIA_R2r  = "GAIA_RP2r"
 # 2MASS
 TWOMASS_J = "2J"
 TWOMASS_H = "2H"
@@ -68,7 +73,7 @@ WISE2  = "WISE2"
 WISE3  = "WISE3"
 WISE4  = "WISE4"
 
-# can be used to reverse lookup the telescop
+# can be used to reverse lookup the telescope
 _valid_bands = {
     # Sloan
     SDSS_u:SLOAN,
@@ -82,9 +87,12 @@ _valid_bands = {
     BESSELL_V:GENERIC,
     BESSELL_R:GENERIC,
     BESSELL_I:GENERIC,
-    GAIA_G:GAIA,
-    GAIA_B:GAIA,
-    GAIA_R:GAIA,
+    GAIA_G2:GAIA,
+    GAIA_B2:GAIA,
+    GAIA_R2:GAIA,
+    GAIA_G2r:GAIA,
+    GAIA_B2r:GAIA,
+    GAIA_R2r:GAIA,
     # 2MASS
     TWOMASS_J:TWOMASS,
     TWOMASS_H:TWOMASS,
@@ -231,10 +239,16 @@ bessel  = [Band(BESSELL_U, 3605.1*u.angstrom,  640.4*u.angstrom, 1803.1*u.jansky
            Band(BESSELL_R, 6575.9*u.angstrom, 1591.0*u.angstrom, 2971.4*u.jansky),
            Band(BESSELL_I, 8059.9*u.angstrom, 1495.1*u.angstrom, 2405.3*u.jansky)
           ]
-# Gaia 2nd Release (GAIA2r) values
-gaia    = [Band(GAIA_B, 5278.6*u.angstrom, 2279.4*u.angstrom, 3393.3*u.jansky),
-           Band(GAIA_G, 6773.7*u.angstrom, 4358.4*u.angstrom, 2835.1*u.jansky),
-           Band(GAIA_R, 7919.1*u.angstrom, 2943.7*u.angstrom, 2485.1*u.jansky)
+# Gaia 2nd release  (GAIA2) values
+gaia2   = [Band(GAIA_B2, 5279.9*u.angstrom, 2347.4*u.angstrom, 3534.7*u.jansky),
+           Band(GAIA_G2, 6742.5*u.angstrom, 4183.0*u.angstrom, 3296.2*u.jansky),
+           Band(GAIA_R2, 7883.7*u.angstrom, 2756.8*u.angstrom, 2620.3*u.jansky)
+          ]
+
+# Gaia 2nd Release revised (GAIA2r) values
+gaia2r   = [Band(GAIA_B2r, 5278.6*u.angstrom, 2279.4*u.angstrom, 3393.3*u.jansky),
+           Band(GAIA_G2r, 6773.7*u.angstrom, 4358.4*u.angstrom, 2835.1*u.jansky),
+           Band(GAIA_R2r, 7919.1*u.angstrom, 2943.7*u.angstrom, 2485.1*u.jansky)
           ]
 # 2MASS
 twomass = [Band(TWOMASS_J, 12350.0*u.angstrom, 1624.1*u.angstrom, 1594.0*u.jansky), 
@@ -266,7 +280,7 @@ wise     = [Band(WISE1,33526.0*u.angstrom, 6626.4*u.angstrom,  309.5*u.jansky),
            ]
 
 # add any new FilterSets to this list
-all_filtersets = [ sloan, gaia, bessel, twomass, spitzer, herschel, wise ]
+all_filtersets = [ sloan, gaia2, bessel, twomass, spitzer, herschel, wise ]
 all_names      = [ SLOAN, GAIA, GENERIC, TWOMASS, SPITZER, HERSCHEL, WISE ]
 
 

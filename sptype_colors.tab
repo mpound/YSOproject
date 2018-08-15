@@ -1,10 +1,13 @@
-\  "Calibration of MK spectral types". Handbook of Space Astronomy and Astrophysics (3rd ed.). Cambridge University Press. p
-\ B9V,A3V,A4V,K3V,K4V,F1V,F3V,F4V,F6V,F7V linearly interpolated from adjacent entries
+\  "Calibration of MK spectral types". Handbook of Space Astronomy and Astrophysics (3rd ed.). Cambridge University Press. p69
+\ G1V,G3V,G4V,G6V, G7V
+\ B1V, B9V,A3V,A4V,K1V, K3V,K4V,F1V,F3V,F4V,F6V,F7V,
+\ K1III, G9III,G linearly interpolated from adjacent entries
 |sptype |  Mv    |  B_V   |  U_B   |  V_R   |  R_I   |  Teff  |   BC   | 
 | char  |  real  |  real  |  real  |  real  |  real  |   real |  real  |   
 |       |  mag   |  mag   |  mag   |  mag   |  mag   |   K    |   mag  |   
    05V    -5.70    -0.33    -1.19    -0.15    -0.32    42000    -4.40 
    09V    -4.50    -0.31    -1.12    -0.15    -0.32    34000    -3.33 
+   B1V   -3.225    -0.27    -0.96    -0.115  -0.255   25450.0   -2.755
    B0V    -4.00    -0.30    -1.08    -0.13    -0.29    30000    -3.16 
    B2V    -2.45    -0.24    -0.84    -0.10    -0.22    20900    -2.35 
    B5V    -1.20    -0.17    -0.58    -0.06    -0.16    15200    -1.46 
@@ -28,7 +31,13 @@
    G2V    +4.70    +0.63    +0.12     0.53     0.33     5790    -0.20 
    G5V    +5.10    +0.68    +0.20     0.54     0.35     5560    -0.21 
    G8V    +5.50    +0.74    +0.30     0.58     0.38     5310    -0.40 
+   G1V    4.55     0.605    0.09     0.515     0.320   5865.0   -0.19
+   G3V    4.8      0.6425    0.14    0.5325    0.335   5732.5   -0.2025
+   G4V    5.0      0.6675    0.18    0.5375    0.345   5617.5   -0.2075
+   G6V    5.2      0.695    0.225    0.55     0.3575   5497.5   -0.2575
+   G7V    5.4      0.725    0.275    0.57     0.3725   5372.5   -0.3525
    K0V    +5.90    +0.81    +0.45     0.64     0.42     5150    -0.31 
+   K1V    6.15      0.86     0.545    0.69     0.45    4990.0  -0.365
    K2V    +6.40    +0.91    +0.64     0.74     0.48     4830    -0.42 
    K3V   6.6375     0.97     0.75    0.8025   0.5175   4725.0   -0.495
    K4V   7.1125     1.09     0.97    0.9275   0.5925   4515.0   -0.645
@@ -39,6 +48,7 @@
   G5III   +0.9     +0.86    +0.56     0.69     0.48     5050    -0.34 
   G8III   +0.8     +0.94    +0.70     0.70     0.48     4800    -0.42 
   K0III   +0.7     +1.00    +0.84     0.77     0.53     4660    -0.50 
+  K1III    0.6      1.08     1.0      0.805    0.555    4525    -0.555
   K2III   +0.5     +1.16    +1.16     0.84     0.58     4390    -0.61 
   K5III   -0.2     +1.50    +1.81     1.20     0.90     4050    -1.02 
   M0III   -0.4     +1.56    +1.87     1.23     0.94     3690    -1.25 

@@ -2,12 +2,13 @@
 import numpy as np
 import numpy.ma as ma
 from astropy.io import ascii
-from astropy.table import Table,join,Column
+from astropy.table import Table,join,Column,MaskedColumn
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 import pandas as pd
 import re
 import filtermanage as fm
+from sed import SED
 
 #from astropy.visualization import quantity_support
 #quantity_support()
@@ -87,6 +88,23 @@ for i in range(len(idx)):
     moretable['StarName'][z] = tconcat['StarName'][i]
 
 tfinal = join(tconcat,moretable)
+tcolors = Table.read("sptype_colors.tab",format="ipac")
+spcolors = dict(zip(tcolors['sptype'],tcolors['B_V']))
+bmv0 = ma.masked_array(np.zeros(len(tfinal)),fill_value = -999)
+for i in range(len(tfinal)):
+    val = tfinal['SpType'][i]
+    if val[-1].isdigit():
+        key = val + 'V'
+    else:
+        key = val
+    if key in spcolors:
+        bmv0[i] = spcolors[key]
+    else:
+        bmv0[i] = ma.masked
+tfinal['B_V_0'] = MaskedColumn(name='B_V_0',data=bmv0)
+tfinal['B_V'] = tfinal['FLUX_B']-tfinal['FLUX_V']
+tfinal['B_V_ERROR'] = (tfinal['FLUX_ERROR_B']*tfinal['FLUX_ERROR_B']+tfinal['FLUX_ERROR_V']*tfinal['FLUX_ERROR_V'])**.5
+tfinal['EB_V']  = tfinal['B_V'] - tfinal['B_V_0']
 
 #--------------
 # cute but not necessary.
@@ -104,17 +122,43 @@ for c in tfinal.colnames:
     s = c.replace("'","").replace("-","_").replace(" ","_")
     tfinal[c].name = s
     # force a sensible output format for floats
-    if tfinal[s].dtype == np.dtype('float64'): formats[s] = "%0.3f"
+    if tfinal[s].dtype == np.dtype('float64'): formats[s] = "%0.3E"
 tfinal.write("sdss_standards.tab",format='ipac',DBMS=False,formats=formats,overwrite=True)
 tfinal.write("sdss_standards.votab",format='votable',overwrite=True)
 
-# Now make a SEDFitter source input file, in its peculiar format
+if False:
+    # Now make a SEDFitter source input file, in its peculiar format
 
-cols = ["StarName","RA_d","DEC_d","u","rms_u","g","rms_g","r","rms_r","i","rms_i","z","rms_z",
-        "FLUX_U","FLUX_ERROR_U","FLUX_B","FLUX_ERROR_B","FLUX_V","FLUX_ERROR_V",
-        "FLUX_R","FLUX_ERROR_R","FLUX_I","FLUX_ERROR_I",
-        "FLUX_J","FLUX_ERROR_J","FLUX_H","FLUX_ERROR_H","FLUX_K","FLUX_ERROR_K"
-       ]
 
-fsm = fm.FilterSetManager()
-for i in tfinal:
+    #cols = {'ID':"StarName",'RA':"RA_d","DEC":"DEC_d",
+    #        "u","rms_u","g","rms_g","r","rms_r","i","rms_i","z","rms_z",
+    #        "FLUX_U","FLUX_ERROR_U","FLUX_B","FLUX_ERROR_B","FLUX_V","FLUX_ERROR_V",
+    #        "FLUX_R","FLUX_ERROR_R","FLUX_I","FLUX_ERROR_I",
+    #        "FLUX_J","FLUX_ERROR_J","FLUX_H","FLUX_ERROR_H","FLUX_K","FLUX_ERROR_K"
+    #       ]
+    cols = [
+            (fm.SDSS_u,"u","rms_u"),
+            (fm.SDSS_g,"g","rms_g"),
+            (fm.SDSS_r,"r","rms_r"),
+            (fm.SDSS_i,"i","rms_i"),
+            (fm.SDSS_z,"z","rms_z"),
+            (fm.U,"FLUX_U","FLUX_ERROR_U"),
+            (fm.B,"FLUX_B","FLUX_ERROR_B"),
+            (fm.V,"FLUX_V"),("FLUX_ERROR_V"),
+            (fm.R,"FLUX_R","FLUX_ERROR_R"),
+            (fm.I,"FLUX_I","FLUX_ERROR_I"),
+            (fm.TWOMASS_J,"FLUX_J","FLUX_ERROR_J"),
+            (fm.TWOMASS_H,"FLUX_H","FLUX_ERROR_H"),
+            (fm.TWOMASS_H,"FLUX_K","FLUX_ERROR_K")
+           ]
+
+    seds = []
+    for i in tfinal:
+        s = SED(i['StarName'],i['Distance_distance']*u.pc,i['RA_d']*u.degree,i['DEC_d']*u.degree)
+        for c in cols:
+            s.addData(c[0],u.Magnitude(i[c[1]]),u.Magnitude(i[c[2]]),1)
+        seds.append(s)
+
+    for s in seds:
+        s.sedfitterinput()
+

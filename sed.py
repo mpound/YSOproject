@@ -8,7 +8,7 @@ import quantityhelpers as qh
 
 class SED():
     """Simple spectral energy distribution class for input into SEDFitter"""
-    def __init__(self,name,distance,disterr,ra=0*u.degree,dec=0*u.degree):
+    def __init__(self,name,distance,disterr,ra=0*u.degree,dec=0*u.degree,av=0):
        if not qh.isLength(distance):
           raise Exception("distance must be an Astropy Quantity with units length")
        if not qh.isLength(disterr[0]):
@@ -22,6 +22,8 @@ class SED():
        self._name     = name
        self._distance = distance
        self._disterr= disterr
+       self._av     = av
+       #self._averr = averr
        self._coord = coord.ICRS(ra=ra,dec=dec)
        self._photometry = dict()
 

@@ -1,11 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-#get_ipython().run_line_magic('load_ext', 'autoreload')
-#get_ipython().run_line_magic('autoreload', '2')
 import os
 import glob
 import sys
@@ -33,29 +26,25 @@ from astropy.io import ascii
 from astropy.table import Table
 
 
-# In[3]:
-
-
 do_plot = False
 do_fit  = True
 
-tsources = Table.read("sdss_standards.votab")
-
-
-# In[4]:
-
+tsources = Table.read("sdss_standards+gaia.votab")
 
 cols = [
-        (fm.SDSS_u,"u","rms_u"),
-        (fm.SDSS_g,"g","rms_g"),
-        (fm.SDSS_r,"r","rms_r"),
-        (fm.SDSS_i,"i","rms_i"),
-        (fm.SDSS_z,"z","rms_z"),
-        (fm.BESSELL_U,"FLUX_U","FLUX_ERROR_U"),
-        (fm.BESSELL_B,"FLUX_B","FLUX_ERROR_B"),
-        (fm.BESSELL_V,"FLUX_V","FLUX_ERROR_V"),
-        (fm.BESSELL_R,"FLUX_R","FLUX_ERROR_R"),
-        (fm.BESSELL_I,"FLUX_I","FLUX_ERROR_I"),
+#        (fm.SDSS_u,"u","rms_u"),
+#        (fm.SDSS_g,"g","rms_g"),
+#        (fm.SDSS_r,"r","rms_r"),
+#        (fm.SDSS_i,"i","rms_i"),
+#        (fm.SDSS_z,"z","rms_z"),
+        (fm.GAIA_G2,"phot_g_mean_mag","phot_g_mean_mag_error"),
+        (fm.GAIA_B2,"phot_bp_mean_mag","phot_bp_mean_mag_error"),
+        (fm.GAIA_R2,"phot_rp_mean_mag","phot_rp_mean_mag_error"),
+#        (fm.BESSELL_U,"FLUX_U","FLUX_ERROR_U"),
+#        (fm.BESSELL_B,"FLUX_B","FLUX_ERROR_B"),
+#        (fm.BESSELL_V,"FLUX_V","FLUX_ERROR_V"),
+#        (fm.BESSELL_R,"FLUX_R","FLUX_ERROR_R"),
+#        (fm.BESSELL_I,"FLUX_I","FLUX_ERROR_I"),
         (fm.TWOMASS_J,"FLUX_J","FLUX_ERROR_J"),
         (fm.TWOMASS_H,"FLUX_H","FLUX_ERROR_H"),
         (fm.TWOMASS_K,"FLUX_K","FLUX_ERROR_K")
@@ -64,7 +53,7 @@ apertures = []
 filters   = []
 fsm = fm.FilterSetManager()
 for i in range(len(cols)):
-    apertures.append(3.0)
+    apertures.append(5.0)
     #tel = fm._valid_bands[cols[i][0]].lower()
     #wave=fsm.wavelength(tel,cols[i][0]).to(u.micron)
     filters.append(cols[i][0])
@@ -73,24 +62,51 @@ apertures *= u.arcsec
 #filters   *= u.micron
 print(filters)
 print(apertures)
- #          u      g      r      i       z        
 colors = [
-           "blue","blue","blue","blue","blue", 
+ #          u            g          r      i       z        
+#           "violet","lightgreen","magenta","indianred","cyan", 
+#           "black","black","black","black","black",
+ #          G      GB      GR
+            
+#          "darkgreen","turquoise","plum",
+           "black","black","black",
 #            U     B       V       R       I        
-#          "green","green","green","green","green",
-# J    H     K
-          "red","red","red"
+#          "black","blue","green","red","indigo",
+#           "black","black","black","black","black",
+#            J    H     K
+#          "orange","pink","darkred"
+           "black","black","black",
          ]
+markers = [
+ #          ugriz        
+#           "+","+","+","+","+", 
+ #          G      GB      GR
+            
+          "o","o","o",
+#            U     B       V       R       I        
+#          "v","v","v","v","v",
+#            J    H     K
+          "s","s","s"
+          ]
+lu = dict()
+lu['+'] = 'ugriz'
+lu['o'] = 'GAIA'
+lu['v'] = 'UBVRI'
+lu['s'] = 'JHK'
 #outdir='fits_ugrizJHK/'
 #plotdir="plots_ugrizJHK/"
-outdir='fits_ugrizUBVRIJHK/'
-plotdir="plots_ugrizUBVRIJHK/"
+#outdir='fits_ugrizUBVRIJHK/'
+#plotdir="plots_ugrizUBVRIJHK/"
 #outdir='fits_UBVRIJHK/'
 #plotdir="plots_UBVRIJHK/"
 #outdir='fits_UBVRI/'
 #plotdir="plots_UBVRI/"
 #outdir='fits_ugriz/'
 #plotdir="plots_ugriz/"
+#outdir = "fits_ugriz_extinction/"
+#plotdir = "plots_ugriz_extinction/"
+outdir = "fits_gaia2jhk_extinction/"
+plotdir = "plots_gaia2jhk_extinction/"
 
 seds = []
 for i in tsources:
@@ -98,7 +114,9 @@ for i in tsources:
     if ma.is_masked(i['Distance_distance']) or ma.is_masked(i['Distance_merr']) or ma.is_masked(i['Distance_perr']): 
             continue
 
-    s = SED(i['StarName'],i['Distance_distance']*u.pc,(i['Distance_merr'],i['Distance_perr'])*u.pc,i['RA_d']*u.degree,i['DEC_d']*u.degree)
+    av = 3.1*i['EB_V']
+    #print(type(av),av)
+    s = SED(i['StarName'],i['Distance_distance']*u.pc,(i['Distance_merr'],i['Distance_perr'])*u.pc,i['RA_d']*u.degree,i['DEC_d']*u.degree,av=av)
     for c in cols:
         validity=1
         if np.ma.is_masked(i[c[1]]) or np.ma.is_masked(i[c[2]]):
@@ -111,8 +129,11 @@ for i in tsources:
     if not bad: 
         seds.append(s)
         if do_plot:
-            plt.scatter(s.wavelengths(),s.fluxes(),c=colors)
+            for x,y,c,m in zip(s.wavelengths(),s.fluxes(),colors,markers):
+                plt.scatter(x,y,c=c,marker=m,s=20)
             plt.title(s._name)
+            patches = [plt.plot([],[],marker=z,ls="",color='k',label=lu[z])[0] for z in lu.keys()]
+            plt.legend(handles=patches,loc='best',numpoints=1,ncol=1, bbox_to_anchor=(.9,0.65),framealpha=1)
             plt.show()
 
 #print(s.sedfitterinput())
@@ -121,11 +142,11 @@ print("Starting with %d sources" % len(seds))
 
 # ugh sedfitter.fit() only allows one distance so we have to do 
 # each source one at a time.
-av_range=[0., 20.]
+default_av_range=[0., 4.]
 dust_model = 'whitney.r550.par'
-#topdir        = '/n/subaruraid/mpound/'
-#model_dir     = topdir+'sedfittermodels/'
-model_dir     = '/lupus3/mpound/filter_convolve/'
+topdir        = '/n/subaruraid/mpound/'
+model_dir     = topdir+'sedfittermodels/'
+#model_dir     = '/lupus3/mpound/filter_convolve/'
 sed_model_dir = model_dir+'models_r17/s---s-i/'
 extinction = Extinction.from_file(dust_model, columns=[0, 3],wav_unit=u.micron, chi_unit=u.cm**2 / u.g)
 
@@ -140,7 +161,7 @@ if False:
 #plt.ylim(1e-2, 1e8)
 
 
-bad = open("badfits","w")
+bad = open("badfits_gaiajhk","w")
 if do_fit:
     for s in seds:
         #source = Source.from_ascii(s.sedfitterinput())
@@ -153,6 +174,13 @@ if do_fit:
         nospacename = s._name.replace(' ','_')
         outfit = outdir+nospacename+'.sedfit'
         distance_range = [s._distance.value+s._disterr[0].value,s._distance.value+s._disterr[1].value]*u.pc
+        if ma.is_masked(s._av):
+           av_range = default_av_range
+        else:
+           if av<=0:
+               av_range = [0 , av+1.5]
+           else:
+               av_range = [0 , av*2.0]
 #        distance_range = [s._distance.value-50,s._distance.value+50]*u.pc
         #fitter = Fitter(filter_names=filters,
         try:
@@ -163,7 +191,7 @@ if do_fit:
                     output_convolved=False, output=outfit,
                     remove_resolved=False)
         except Exception as e:
-            bad.write(nospacename+"\n")
+            bad.write("%s  %s\n"% (nospacename,e))
             thisbad = True
             print(e)
         #info = fitter.fit(source)
@@ -181,4 +209,3 @@ if do_fit:
                      show_convolved=False, show_sed=True)
 
 bad.close()
-
