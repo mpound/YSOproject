@@ -32,19 +32,19 @@ do_fit  = True
 tsources = Table.read("sdss_standards+gaia.votab")
 
 cols = [
-#        (fm.SDSS_u,"u","rms_u"),
-#        (fm.SDSS_g,"g","rms_g"),
-#        (fm.SDSS_r,"r","rms_r"),
-#        (fm.SDSS_i,"i","rms_i"),
-#        (fm.SDSS_z,"z","rms_z"),
+        (fm.SDSS_u,"u","rms_u"),
+        (fm.SDSS_g,"g","rms_g"),
+        (fm.SDSS_r,"r","rms_r"),
+        (fm.SDSS_i,"i","rms_i"),
+        (fm.SDSS_z,"z","rms_z"),
         (fm.GAIA_G2,"phot_g_mean_mag","phot_g_mean_mag_error"),
         (fm.GAIA_B2,"phot_bp_mean_mag","phot_bp_mean_mag_error"),
         (fm.GAIA_R2,"phot_rp_mean_mag","phot_rp_mean_mag_error"),
-#        (fm.BESSELL_U,"FLUX_U","FLUX_ERROR_U"),
-#        (fm.BESSELL_B,"FLUX_B","FLUX_ERROR_B"),
-#        (fm.BESSELL_V,"FLUX_V","FLUX_ERROR_V"),
-#        (fm.BESSELL_R,"FLUX_R","FLUX_ERROR_R"),
-#        (fm.BESSELL_I,"FLUX_I","FLUX_ERROR_I"),
+        (fm.BESSELL_U,"FLUX_U","FLUX_ERROR_U"),
+        (fm.BESSELL_B,"FLUX_B","FLUX_ERROR_B"),
+        (fm.BESSELL_V,"FLUX_V","FLUX_ERROR_V"),
+        (fm.BESSELL_R,"FLUX_R","FLUX_ERROR_R"),
+        (fm.BESSELL_I,"FLUX_I","FLUX_ERROR_I"),
         (fm.TWOMASS_J,"FLUX_J","FLUX_ERROR_J"),
         (fm.TWOMASS_H,"FLUX_H","FLUX_ERROR_H"),
         (fm.TWOMASS_K,"FLUX_K","FLUX_ERROR_K")
@@ -64,27 +64,27 @@ print(filters)
 print(apertures)
 colors = [
  #          u            g          r      i       z        
-#           "violet","lightgreen","magenta","indianred","cyan", 
+           "violet","lightgreen","magenta","indianred","cyan", 
 #           "black","black","black","black","black",
  #          G      GB      GR
             
-#          "darkgreen","turquoise","plum",
-           "black","black","black",
+          "darkgreen","turquoise","plum",
+#           "black","black","black",
 #            U     B       V       R       I        
-#          "black","blue","green","red","indigo",
+          "black","blue","green","red","indigo",
 #           "black","black","black","black","black",
 #            J    H     K
-#          "orange","pink","darkred"
-           "black","black","black",
+          "orange","pink","darkred"
+#           "black","black","black",
          ]
 markers = [
  #          ugriz        
-#           "+","+","+","+","+", 
+           "+","+","+","+","+", 
  #          G      GB      GR
             
           "o","o","o",
 #            U     B       V       R       I        
-#          "v","v","v","v","v",
+          "v","v","v","v","v",
 #            J    H     K
           "s","s","s"
           ]
@@ -93,24 +93,25 @@ lu['+'] = 'ugriz'
 lu['o'] = 'GAIA'
 lu['v'] = 'UBVRI'
 lu['s'] = 'JHK'
-#outdir='fits_ugrizJHK/'
-#plotdir="plots_ugrizJHK/"
+outdir='fits_ugrizJHK_extinction/'
+plotdir="plots_ugrizJHK_extinction/"
 #outdir='fits_ugrizUBVRIJHK/'
 #plotdir="plots_ugrizUBVRIJHK/"
-#outdir='fits_UBVRIJHK/'
-#plotdir="plots_UBVRIJHK/"
+#outdir='fits_UBVRIJHK_extinction/'
+#plotdir="plots_UBVRIJHK_extinction/"
 #outdir='fits_UBVRI/'
 #plotdir="plots_UBVRI/"
 #outdir='fits_ugriz/'
 #plotdir="plots_ugriz/"
 #outdir = "fits_ugriz_extinction/"
 #plotdir = "plots_ugriz_extinction/"
-outdir = "fits_gaia2jhk_extinction/"
-plotdir = "plots_gaia2jhk_extinction/"
+#outdir = "fits_gaia2jhk_extinction/"
+#plotdir = "plots_gaia2jhk_extinction/"
+badfile = 'badfits.ugrizJHK_extinction'
 
 seds = []
 for i in tsources:
-    bad = False
+    abad = False
     if ma.is_masked(i['Distance_distance']) or ma.is_masked(i['Distance_merr']) or ma.is_masked(i['Distance_perr']): 
             continue
 
@@ -123,10 +124,10 @@ for i in tsources:
 #            print("flux and/or error is masked for Source %s band %s...setting validity to zero."%(s._name,c[0]))
 #            validity = 0
             print("flux and/or error is masked for Source %s band %s...skipping ."%(s._name,c[0]))
-            bad = True
+            abad = True
         else:
             s.addData(c[0],u.Magnitude(i[c[1]]),u.Magnitude(i[c[2]]),validity)
-    if not bad: 
+    if not abad: 
         seds.append(s)
         if do_plot:
             for x,y,c,m in zip(s.wavelengths(),s.fluxes(),colors,markers):
@@ -161,7 +162,7 @@ if False:
 #plt.ylim(1e-2, 1e8)
 
 
-bad = open("badfits_gaiajhk","w")
+bad = open(badfile,"w")
 if do_fit:
     for s in seds:
         #source = Source.from_ascii(s.sedfitterinput())

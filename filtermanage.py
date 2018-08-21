@@ -411,6 +411,9 @@ class Photometry():
        self._validity = validity
        self._fsm      = FilterSetManager()
 
+    def set_upper_limit(self,sn=3.0):
+        if self._flux/self._error < sn:
+           self._validity = 3  # upper limit flag.
     @property
     def band(self):
         return self._bandname
