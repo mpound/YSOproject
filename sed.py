@@ -8,24 +8,61 @@ import quantityhelpers as qh
 
 class SED():
     """Simple spectral energy distribution class for input into SEDFitter"""
-    def __init__(self,name,distance,disterr,ra=0*u.degree,dec=0*u.degree,av=0):
+    def __init__(self,name,distance,disterr,ra=0*u.degree,dec=0*u.degree,av=None,averr=None):
        if not qh.isLength(distance):
           raise Exception("distance must be an Astropy Quantity with units length")
-       if not qh.isLength(disterr[0]):
-          raise Exception("minus distance error must be an Astropy Quantity with units length")
-       if not qh.isLength(disterr[1]):
-          raise Exception("plus distance error must be an Astropy Quantity with units length")
        if not qh.isQuantity(ra):
           raise Exception("Right Ascension must be an Astropy Quantity")
        if not qh.isQuantity(dec):
           raise Exception("Declination must be an Astropy Quantity")
-       self._name     = name
-       self._distance = distance
-       self._disterr= disterr
-       self._av     = av
-       #self._averr = averr
+       self._name     = str(name)
+       self._distance = distance.to(u.pc)
+       if type(disterr) == tuple:
+           # error is +/-
+           if disterr[1] > disterr[0]:
+               self._disterr= (disterr[1].to(u.pc),disterr[0].to(u.pc))
+           else:
+               self._disterr= (disterr[0].to(u.pc),disterr[1].to(u.pc))
+       else:
+           self._disterr= (disterr.to(u.pc),-disterr.to(u.pc))
+       if not qh.isLength(self._disterr[1]):
+          raise Exception("minus distance error must be an Astropy Quantity with units length")
+       if not qh.isLength(self._disterr[0]):
+          raise Exception("plus distance error must be an Astropy Quantity with units length")
+       if av >= 0:
+           self._av     = av
+       else:
+           self._av     = None
+       if averr >= 0:
+           self._averr = averr
+       else:
+           self._averr = None
        self._coord = coord.ICRS(ra=ra,dec=dec)
        self._photometry = dict()
+
+#    def fix_gaia_errors(self):
+#        for b in ( "GAIA_G2" "GAIA_BP2" "GAIA_RP2" ):
+#            if b in self._photometry:
+#                if self._photometry[b].errormag()<0.004:
+#                   self._photometry[b].errormag()<0.004:
+
+    def set_upper_limits(self):
+        for z in self._photometry.values():
+            z.set_upper_limit(sn=3.0)
+
+    def distrange(self):
+        return [self._distance+self._disterr[1],self._distance+self._disterr[0]]
+
+    def distrange_pc(self):
+        return [self._distance.to(u.pc).value+self._disterr[1].to(u.pc).value,self._distance.to(u.pc).value+self._disterr[0].to(u.pc).value]
+
+    def avrange(self):
+        if self._av == None or self._averr == None: 
+           return [None,None]
+        if self._averr < self._av:
+           return [self._av-self._averr,self._av+self._averr]
+        else:
+           return [0,self._av+self._averr]
 
     def addData(self,bandname,flux,error,validity,unit=None):
        if (np.ma.is_masked(flux) or np.ma.is_masked(error)) and validity != 0:
