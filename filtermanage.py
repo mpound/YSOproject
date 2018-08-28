@@ -17,6 +17,7 @@ import math
 SDSS     = "SDSS"
 SLOAN    = "SDSS"
 SPITZER  = "Spitzer"
+SOFIA    = "SOFIA"
 GAIA     = "GAIA"
 GAIA2     = "GAIA2"
 GAIA2r     = "GAIA2r"
@@ -73,6 +74,27 @@ WISE2  = "WISE2"
 WISE3  = "WISE3"
 WISE4  = "WISE4"
 
+# SOFIA
+FORCAST_F054 ="FORCAST_F054"
+FORCAST_F064 ="FORCAST_F064"
+FORCAST_F066 ="FORCAST_F066"
+FORCAST_F077 ="FORCAST_F077"
+FORCAST_F111 ="FORCAST_F111"
+FORCAST_F113 ="FORCAST_F113"
+FORCAST_F197 ="FORCAST_F197"
+FORCAST_F242 ="FORCAST_F242"
+FORCAST_F315 ="FORCAST_F315"
+FORCAST_F336 ="FORCAST_F336"
+FORCAST_F348 ="FORCAST_F348"
+FORCAST_F371 ="FORCAST_F371"
+HAWC_A ="HAWC_A" 
+HAWC_B ="HAWC_B" 
+HAWC_C ="HAWC_C" 
+HAWC_D ="HAWC_D" 
+HAWC_E ="HAWC_E" 
+
+
+
 # can be used to reverse lookup the telescope
 _valid_bands = {
     # Sloan
@@ -116,7 +138,7 @@ _valid_bands = {
     WISE1:WISE,
     WISE2:WISE,
     WISE3:WISE,
-    WISE4:WISE
+    WISE4:WISE,
 }
 
 def validbands(): 
@@ -203,7 +225,7 @@ class FilterSet():
        if type(bands) != list:
           bands=list(bands)
        for band in bands:
-            self._bands[band._name.lower()] = band
+          self._bands[band._name.lower()] = band
 
     # make this class act like a dictionary keyed by band name
     """Returns Band object associated with band name (case insensitive)"""
