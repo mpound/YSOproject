@@ -52,20 +52,21 @@ class AlphaMaker:
             fname2=self._model_dir+m+'/convolved/'+color2+".fits"
             # convolved data cubes are 90000 fluxes by 20 apertures
             sed1 = ConvolvedFluxes.read(fname1)
-            names = seds1.model_names
-            self._apertures = seds1.apertures
-            if np.sort(sed1.apertures) != np.sort(seds.apertures):
-                raise Exception("apertures don't match")
+            names = sed1.model_names
+            self._apertures = sed1.apertures
             sed2 = ConvolvedFluxes.read(fname2)
-            sed2.sort_to_match(seds1.model_names)
-            self.wavelengths = [sed1.central_wavelegth.to("micron").value, 
-                                sed2.central_wavelegth.to("micron").value]*u.micron
+            sed2.sort_to_match(sed1.model_names)
+            if not np.array_equal(sed1.apertures,sed2.apertures):
+                raise Exception("apertures don't match")
+            self.wavelengths = [sed1.central_wavelength.to("micron").value, 
+                                sed2.central_wavelength.to("micron").value]*u.micron
 
             # compute nu*Fnu for the two wavelengths
             sed2.nu = sed2.central_wavelength.to(u.Hz,equivalencies=u.spectral()) 
             sed1.nu = sed1.central_wavelength.to(u.Hz,equivalencies=u.spectral())
-            self._alpha[m] =   np.log10(sed2.nu.value*sed2.flux.value) - np.log10(sed1.nu.value*sed1.flux.value)
+            self._alpha[m] =   (np.log10(sed2.nu.value*sed2.flux.value) - np.log10(sed1.nu.value*sed1.flux.value))/(np.log10(sed2.nu.value)-np.log10(sed1.nu.value))
 
+            return self._alpha[m]
            
 class AlphaPlot():
     def __init__(self,wavelength,alpha,model=""):
@@ -74,25 +75,32 @@ class AlphaPlot():
         if len(wavelength) != 4:
           raise Exception("Expected 4 alphas, got %d" % len(wavelength))
         self._alpha = alpha
+        print(np.shape(alpha))
+        print(np.shape(np.transpose(self._alpha[0])[0]))
         self._wavelength = wavelength
         self._model = model
 
     def plot(self):
-        ax, f = plt.figure()
-        ax.scatter(self._alpha[0],self.alpha1[1],marker='.')
-        ax[0].set_axislabel(r'$\alpha (%s - %s)'%(wavelength[1],wavelength[0]))
-        ax[1].set_axislabel(r'$\alpha (%s - %s)'%(wavelength[3],wavelength[2]))
-        plt.text("model: %s",self_model)
+        a0 =np.transpose(self._alpha[0])[0]
+        a1 =np.transpose(self._alpha[1])[0]
+        plt.scatter(a0,a1,marker='.')
+        plt.xlabel(r'$\alpha (%s - %s)'%(self._wavelength[1],self._wavelength[0]))
+        plt.ylabel(r'$\alpha (%s - %s)'%(self._wavelength[3],self._wavelength[2]))
+        plt.title("model: %s" % self._model)
         plt.show()
 
 if __name__ == "__main__":
        import filtermanage as fm
        a1 = AlphaMaker(model_type=['s---s-i'])
        w = []
-       alph1 = a1.computeAlpha(fm.FORCAST_F371,fm.FORCAST_F242)
+       alph1 = a1.computeAlpha(fm.FORCAST_F242,fm.FORCAST_F371)
+       print(type(alph1))
        w.extend(a1.wavelengths)
-       alph2 = a1.computeAlpha(fm.IRAC4,fm.IRAC1)
+       alph2 = a1.computeAlpha(fm.IRAC1,fm.IRAC4)
+       print(type(alph2))
+       print("A1 min,max,median,mean %.3f %.3f %.3f %.3f"%(np.min(alph1),np.max(alph1),np.median(alph1),np.mean(alph1)))
+       print("A2 min,max,median,mean %.3f %.3f %.3f %.3f"%(np.min(alph2),np.max(alph2),np.median(alph2),np.mean(alph2)))
        w.extend(a1.wavelengths)
-       a = AlphaPlot(w,alpha1,alph2)
+       a = AlphaPlot(w,[alph1,alph2],model="s---s-i")
        a.plot()
     
