@@ -84,14 +84,14 @@ outdir="fits_GAIA_YSOc_"+select_class+"/"
 plotdir="plots_GAIA_YSOc_"+select_class+"/"
 badfile = 'badfits.GAIA_YSOc'
 if fudge_Gaia and not fudge_Spitzer:
-    outdir=outdir+"_fudge_gaia/"
-    plotdir=plotdir+"_fudge_gaia/"
+    outdir=outdir[0:-1]+"_fudge_gaia/"
+    plotdir=plotdir[0:-1]+"_fudge_gaia/"
 if not fudge_Gaia and fudge_Spitzer:
-    outdir=outdir+"_fudge_spitzer/"
-    plotdir=plotdir+"_fudge_spitzer/"
+    outdir=outdir[0:-1]+"_fudge_spitzer/"
+    plotdir=plotdir[0:-1]+"_fudge_spitzer/"
 if fudge_Gaia and fudge_Spitzer:
-    outdir=outdir+"_fudge_gaia_spitzer/"
-    plotdir=plotdir+"_fudge_gaia_spitzer/"
+    outdir=outdir[0:-1]+"_fudge_gaia_spitzer/"
+    plotdir=plotdir[0:-1]+"_fudge_gaia_spitzer/"
 
 #skipme = ["M1_flux"]
 skipme = [""]
@@ -214,16 +214,16 @@ print("Starting with %d sources" % len(seds))
 
 
 models = [
-"s---s-i",
-"s---smi",
-"sp--h-i",
-"sp--s-i",
-"s-pbhmi",
-"s-pbsmi",
-"s-p-hmi",
-"sp--hmi",
-"sp--smi",
-"s-p-smi",
+#"s---s-i",
+#"s---smi",
+#"sp--h-i",
+#"sp--s-i",
+#"s-pbhmi",
+#"s-pbsmi",
+#"s-p-hmi",
+#"sp--hmi",
+#"sp--smi",
+#"s-p-smi",
 'spubhmi',  
 'spubsmi',  
 'spu-hmi',  
@@ -246,7 +246,7 @@ extinction = Extinction.from_file(dust_model, columns=[0, 3],wav_unit=u.micron, 
 
 bad = open(badfile,"w")
 if do_fit:
-    for s in seds[0:1]:
+    for s in seds:
         thisbad=False
         datafile='tmpdir/'+s._name+"_input.txt"
         f = open(datafile,"w")
