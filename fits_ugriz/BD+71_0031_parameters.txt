@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                    BD+71_0031          5          1 
-         1                    GbuVahpU_01  32454.996      0.935     -0.741  1.043e+00  8.288e+03  1.000e+00  4.500e+01 

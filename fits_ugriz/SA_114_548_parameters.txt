@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                    SA_114_548          5          1 
-         1                    eH81YB0V_01  25293.036      0.084      0.159  1.486e+01  4.282e+03  1.000e+00  4.500e+01 

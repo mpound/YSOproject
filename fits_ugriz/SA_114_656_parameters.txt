@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                    SA_114_656          5          1 
-         1                    Oir13zl7_01  27696.767      0.023     -0.050  3.102e+00  5.209e+03  1.000e+00  4.500e+01 

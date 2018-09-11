@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                    SA_104_428          5          1 
-         1                    SPW8LLzI_01  17415.470      0.000      0.064  4.592e+00  4.867e+03  1.000e+00  4.500e+01 

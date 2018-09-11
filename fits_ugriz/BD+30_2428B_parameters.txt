@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                   BD+30_2428B          5          1 
-         1                    roMvTEUK_01  15730.338      0.000     -1.116  8.148e-01  4.849e+03  1.000e+00  4.500e+01 

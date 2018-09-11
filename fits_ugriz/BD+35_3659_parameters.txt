@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                    BD+35_3659          5          1 
-         1                    McUh3LG2_01  84316.576      0.850     -0.958  6.031e-01  8.194e+03  1.000e+00  4.500e+01 

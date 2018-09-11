@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                      SA_96_83          5          1 
-         1                    PRydcp46_01  14949.526      0.008      0.148  2.473e+00  8.272e+03  1.000e+00  4.500e+01 

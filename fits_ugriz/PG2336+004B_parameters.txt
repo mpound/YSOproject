@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                   PG2336+004B          5          1 
-         1                    5rLYIRNd_01  16566.489      0.622     -0.346  8.572e-01  8.052e+03  1.000e+00  4.500e+01 

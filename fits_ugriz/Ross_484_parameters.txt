@@ -1,5 +1,0 @@
-         source_name             n_data     n_fits   
-  fit_id             model_name              chi2        av       scale    star.radius star.temperature scattering inclination 
-----------------------------------------------------------------------------------------------------------------------------------
-                      Ross_484          5          1 
-         1                    GtkKtr0E_01   9315.425      0.033     -1.337  5.125e-01  4.694e+03  1.000e+00  4.500e+01 
