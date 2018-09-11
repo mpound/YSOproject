@@ -29,11 +29,11 @@ class SED():
           raise Exception("minus distance error must be an Astropy Quantity with units length")
        if not qh.isLength(self._disterr[0]):
           raise Exception("plus distance error must be an Astropy Quantity with units length")
-       if av >= 0:
+       if av == None or av >= 0:
            self._av     = av
        else:
            self._av     = None
-       if averr >= 0:
+       if averr == None or averr >= 0:
            self._averr = averr
        else:
            self._averr = None
@@ -105,6 +105,12 @@ class SED():
            f.append(s.mjy())
        return f*u.mJy
 
+    def errors(self):
+       f = []
+       for s in self._photometry.values():
+           f.append(s.errormjy())
+       return f*u.mJy
+
     def sedfitterinput(self):
        """Return this SED as an input source for SEDFitter code"""
        #line = self.header() + "\n"
@@ -121,21 +127,26 @@ class SED():
 
 if __name__ == "__main__":
        import filtermanage as fm
-       pm = SED("MySource",100*u.pc,13.3*u.hour,-22*u.degree)
+       pm = SED("MySource",distance=100*u.pc,disterr=1*u.pc,ra=13.3*u.hour,dec=-22*u.degree)
        # will raise exception
        try:
            pm = SED("testbaddistance",100*u.degree,13.3*u.hour,-22*u.degree)
        except Exception as e:
            print("EXCEPTION CAUGHT:",e)
        q = 1*u.Jy
-       pm.addData(fm.SDSS_g,q/50, q/5000.0,0)
-       pm.addData(fm.TWOMASS_K,q, q/100.0,1)
-       # will raise warning
-       pm.addData("3J",q/10, q/300.0,1)
-       pm.addData(fm.SDSS_u,q/100, q/1000.0,0)
-       print(pm.sedfitterinput())
+#source id 4885742854871204860
+       pm.addData(fm.SDSS_z,u.Magnitude(14.15327), u.Magnitude(0.007049335),validity=1)
+       pm.addData(fm.SDSS_i,u.Magnitude(14.29342), u.Magnitude(0.006180155),validity=1)
+       #pm.addData(fm.TWOMASS_K,q, q/100.0,validity=1)
+       print(pm.errors())
+       print(pm.errors().to(u.uJy))
+       if False:
+           # will raise warning
+           pm.addData("3J",q/10, q/300.0,1)
+           pm.addData(fm.SDSS_u,q/100, q/1000.0,0)
+           print(pm.sedfitterinput())
 
-       g = u.Magnitude(10)
-       print(g)
-       print(g.unit)
-       print(qh.isMagnitude(g))
+           g = u.Magnitude(10)
+           print(g)
+           print(g.unit)
+           print(qh.isMagnitude(g))
