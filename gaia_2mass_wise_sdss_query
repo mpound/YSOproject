@@ -1,0 +1,19 @@
+SELECT g.source_id as g_source_id, g.ref_epoch, g.ra as g_ra, g.ra_error as g_ra_error, g.dec as g_dec, g.dec_error as g_dec_error, parallax, parallax_error, parallax_over_error, pmra, pmra_error, pmdec, pmdec_error, duplicated_source, phot_g_n_obs, phot_g_mean_flux, phot_g_mean_flux_error, phot_g_mean_flux_over_error, phot_g_mean_mag, phot_bp_n_obs, phot_bp_mean_flux, phot_bp_mean_flux_error, phot_bp_mean_flux_over_error, phot_bp_mean_mag, phot_rp_n_obs, phot_rp_mean_flux, phot_rp_mean_flux_error, phot_rp_mean_flux_over_error, phot_rp_mean_mag, phot_bp_rp_excess_factor, phot_proc_mode, bp_rp, bp_g, g_rp, radial_velocity, radial_velocity_error, phot_variable_flag, l, b, teff_val, teff_percentile_lower, teff_percentile_upper, a_g_val, a_g_percentile_lower, a_g_percentile_upper, e_bp_min_rp_val, e_bp_min_rp_percentile_lower, e_bp_min_rp_percentile_upper, radius_val, radius_percentile_lower, radius_percentile_upper, lum_val, lum_percentile_lower, lum_percentile_upper,
+t.source_id as tmass_source_id, t.original_ext_source_id as tmass_orig_ext_source, t.angular_distance as tmass_angular_distance, t.tmass_oid, t.number_of_neighbours as tmass_num_neighbors, t.number_of_mates as tmass_num_mates, t.best_neighbour_multiplicity as tmass_best_neighbor_multiplicity,
+w.source_id, w.original_ext_source_id as wise_orig_ext_source, w.angular_distance as wise_angular_distance, w.allwise_oid, w.number_of_neighbours as wise_num_neighbors, w.number_of_mates as wise_num_mates, w.best_neighbour_multiplicity as wise_best_neighbor_multiplicity,
+s.source_id as sdssdr9_source_id, s.original_ext_source_id as sdssdr9_orig_ext_source, t.angular_distance as sdss_angular_distance, sdssdr9_oid, s.number_of_neighbours as sdssdr9_num_neighbors, s.number_of_mates as sdssdr9_num_mates, s.best_neighbour_multiplicity as sdssdr9_best_neighbor_multiplicity,
+gw.allwise_oid as gdr1_allwise_oid, gw.ra as gdr1_ra, gw.dec as gdr1_dec , gw.ra_error as gdr1_ra_error, gw.dec_error as gdr1_dec_error, w1mpro, w1mpro_error, w2mpro, w2mpro_error, w3mpro, w3mpro_error, w4mpro, w4mpro_error, cc_flags, ext_flag, var_flag, ph_qual, w1gmag,w1gmag_error, w2gmag, w2gmag_error, w3gmag, w3gmag_error, w4gmag, w4gmag_error,
+gs.sdssdr9_oid as gdr1_sdssdr9_oid, gs.obj_id, gs.ra as sdssdr9_ra, gs.dec as sdssdr9_dec, gs.ra_error as sdssdr9_ra_error, gs.dec_error as sdssdr9_dec_error, gs.u_mag, gs.u_mag_error, gs.g_mag, gs.g_mag_error, gs.r_mag, gs.r_mag_error, gs.i_mag, gs.i_mag_error, gs.z_mag, gs.z_mag_error, gs.objc_type, gs.clean_flag
+
+
+FROM gaiadr2.gaia_source AS g 
+
+JOIN gaiadr2.tmass_best_neighbour   AS t USING (source_id)
+JOIN gaiadr2.allwise_best_neighbour AS w  USING (source_id)
+JOIN gaiadr2.sdssdr9_best_neighbour AS s  USING (source_id)
+JOIN gaiadr1.allwise_original_valid AS gw USING (allwise_oid)
+JOIN gaiadr1.sdssdr9_original_valid AS gs USING (sdssdr9_oid)
+WHERE CONTAINS(POINT('ICRS',g.ra,g.dec),BOX('ICRS',275,-2,1,1))=1
+
+
+
