@@ -12,7 +12,7 @@ from astropy.units.quantity import Quantity
 import quantityhelpers as qh
 import math
 
-
+# List of telescopes supported by this code.
 """Telescope names"""
 SDSS     = "SDSS"
 SLOAN    = "SDSS"
@@ -27,6 +27,7 @@ WISE     = "WISE"
 GENERIC  = "Generic" # This is a guess as to which Bessel filter set Robitaille used.  They are slightly different for different telescopes
 
 
+# List of bands supported by this code.
 """Photometric band names. Where common, use same names as SedFitter code (Robitaille)"""
 # @Todo Replace all these with Enums?
 #SDSS = Enum(SLOAN, "u g r i z")
@@ -95,7 +96,8 @@ HAWC_E ="HAWC_E"
 
 
 
-# can be used to reverse lookup the telescope
+# Dictionary that can be used to reverse lookup the telescope for
+# a given band name.    See validbands().
 _valid_bands = {
     # Sloan
     SDSS_u:SLOAN,
@@ -141,6 +143,9 @@ _valid_bands = {
     WISE4:WISE,
 }
 
+""" Wrapper for _valid_bands array.
+    Returns list of valid bands
+"""
 def validbands(): 
     return _valid_bands.keys()
 
@@ -218,9 +223,10 @@ class FilterSet():
        self._bands = dict()
        if bands != None: self.addBands(bands)
 
-    # add one or more Band objects
-    # Parameters:
-    #   bands:  single Band or list of Bands
+    """ Add one or more Band objects
+        Parameters:
+            bands:  single Band or list of Bands
+    """
     def addBands(self,bands):
        if type(bands) != list:
           bands=list(bands)
@@ -239,10 +245,11 @@ class FilterSet():
           raise Exception("Assignment value must be a Band object")
        self._bands[bandname.lower()] = band
  
-######################################################################################
+###########################################################################
 # Mean wavelengths and effective bandwidths in angstrom & Zero Points 
 # in Jansky of various filter sets,  taken from VOSA website.  
 # http://svo2.cab.inta-csic.es/theory/fps/
+###########################################################################
 
 # Create any new FilterSets here.
 
@@ -337,6 +344,7 @@ class FilterSetManager():
             #print("added %s"%(f._name.lower()))
  
 
+    # makes this class act like an array with use of []
     def __getitem__(self,name):
        return self._filtersets[name.lower()]
 
@@ -360,9 +368,10 @@ class FilterSetManager():
     def bandwidth(self,filterset,band):
        return self._filtersets[filterset][band].bw()
 
-    # Return given (milli)jansky
-    # Example: magtoflux("sloan","SDSS_u",10)  returns 156.85 mJy 
-    # @returns astropy Quantity with units u.mJy or u.Jy
+    """ Return flux density given a magnitude
+        Example: magtoflux("sloan","SDSS_u",10)  returns 156.85 mJy 
+        Returns astropy Quantity with units u.mJy or u.Jy
+    """
     def magtoflux(self,telescope,band,magnitude,mjy=True):
        """Return the flux density in Jansky or milliJansky of a source as an astropy Quantity, 
           given the source magnitude.
@@ -384,9 +393,10 @@ class FilterSetManager():
        else:
            return value.to(Jy)
 
-    # Return magnitude given jansky
-    # Example: fluxtomag("sloan","SDSS_u",156.85)  returns 10 mag
-    # @returns astropy Quantity with units u.Magnitude)
+    """ Return magnitude given flux density 
+        Example: fluxtomag("sloan","SDSS_u",156.85)  returns 10 mag
+        Returns astropy Quantity with units u.Magnitude)
+    """
     def fluxtomag(self,telescope,band,flux,mjy=True):
        """Return the magnitude given flux in Jansky as magnitude astropy Quantity.
           Parameters:
@@ -406,7 +416,7 @@ class FilterSetManager():
 
 class Photometry():
 #@todo deal with masked values
-    "A single photometric point"
+    """Class that represents a single photometric point"""
     def __init__(self,bandname,flux,error,validity,unit=None):
        if bandname not in _valid_bands:
           warnings.warn("Unrecognized band name %s. Will not be able to convert between flux density and magnitude." % bandname)
@@ -434,14 +444,18 @@ class Photometry():
        self._fsm      = FilterSetManager()
 
     def set_upper_limit(self,sn=3.0):
+    """Indicate a given value is an upper limit"""
         if self._flux/self._error < sn:
            self._validity = 3  # upper limit flag.
+
     @property
     def band(self):
+    """The Band of this point"""
         return self._bandname
 
     @property
     def wavelength(self):
+    """The wavelength of this point"""
         tel = _valid_bands[self._bandname].lower()
         return self._fsm.wavelength(tel,self._bandname)
 
@@ -455,6 +469,7 @@ class Photometry():
             return self._flux
 
     def mjy(self):
+    """Shortcut to get flux value in mJy as a scalar"""
         return self.flux.to(u.mJy).value
 
     @property
