@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 #
-# Module to manage bands (filters) and filtersets
-# E.g. convert magnitude to flux and vice versa for various wavebands.
-#
-#
+"""Module to manage bands (filters) and filtersets
+E.g. convert magnitude to flux and vice versa for various wavebands.
+"""
 import warnings
 import numpy as np
 #import enum
@@ -75,7 +74,7 @@ WISE2  = "WISE2"
 WISE3  = "WISE3"
 WISE4  = "WISE4"
 
-"""SOFIA"""
+#: SOFIA
 FORCAST_F054 ="FORCAST_F054"
 FORCAST_F064 ="FORCAST_F064"
 FORCAST_F066 ="FORCAST_F066"
@@ -155,7 +154,7 @@ class Band():
     Class to hold information about a photometric band (filter)
 
     Parameters:
-       name (str): canonical name of the band, e.g. 'u' or SDSS_u
+       name (str): canonical name of the band, e.g. SDSS_u
        wavelength (astropy.units.quantity.Quantity): mean wavelength of the band
        bandwidth (astropy.units.quantity.Quantity):  effective bandwidth of the band, in units of (wave)length
        zeropoint (astropy.units.quantity.Quantity):  equivalent flux density of zero magnitude
@@ -194,17 +193,21 @@ class Band():
        # flux zeropoint
        self._zeropoint  = zeropoint
 
-    """Returns band canonical name"""
-    def name(self): return self._name
+    def name(self): 
+       """Returns band canonical name"""
+       return self._name
 
-    """Returns mean wavelength (astropy Quantity)"""
-    def wave(self): return self._wavelength
+    def wave(self): 
+       """Returns mean wavelength (astropy Quantity)"""
+       return self._wavelength
 
-    """Returns effective bandwidth (astropy Quantity)"""
-    def bw(self):   return self._bandwidth
-
-    """Returns zero point flux density (astropy Quantity)"""
-    def zp(self):   return self._zeropoint
+    def bw(self):
+       """Returns effective bandwidth (astropy Quantity)"""
+       return self._bandwidth
+    
+    def zp(self):   
+       """Returns zero point flux density (astropy Quantity)"""
+       return self._zeropoint
 
 class FilterSet():
     """
@@ -219,28 +222,33 @@ class FilterSet():
     """
 
     def __init__(self,name,bands=None):
+       """Initialize a FilterSet.
+          Parameters:  
+            name -  string identifier
+            bands - list of Bands objects
+       """
        self._name  = name  
        self._bands = dict()
        if bands != None: self.addBands(bands)
 
-    """ Add one or more Band objects
-        Parameters:
-            bands:  single Band or list of Bands
-    """
     def addBands(self,bands):
+       """ Add one or more Band objects
+           Parameters:
+               bands:  single Band or list of Bands
+       """
        if type(bands) != list:
           bands=list(bands)
        for band in bands:
           self._bands[band._name.lower()] = band
 
     # make this class act like a dictionary keyed by band name
-    """Returns Band object associated with band name (case insensitive)"""
     def __getitem__(self,bandname):
+       """Returns Band object associated with band name (case insensitive)"""
        return self._bands[bandname.lower()]
 
     # make this class act like a dictionary keyed by band name
-    """Set Band object associated with band name (case insensitive)"""
     def __setitem__(self,bandname,band):
+       """Set Band object associated with band name (case insensitive)"""
        if type(band) != Band:
           raise Exception("Assignment value must be a Band object")
        self._bands[bandname.lower()] = band
@@ -331,12 +339,12 @@ class FilterSetManager():
  
        self.addFilterSets(self._fslist)
 
-    """
-    Add a set of filters.
-    Parameters;
-      filtersets - a list of FilterSet objects or single FilterSet
-    """
     def addFilterSets(self,filtersets):
+       """
+       Add a set of filters.
+       Parameters;
+         filtersets - a list of FilterSet objects or single FilterSet
+       """
        if type(filtersets) != list:
             filtersets=list(filtersets)
        for f in filtersets:
@@ -344,34 +352,32 @@ class FilterSetManager():
             #print("added %s"%(f._name.lower()))
  
 
-    # makes this class act like an array with use of []
     def __getitem__(self,name):
+       """makes this class act like an array with use of []"""
        return self._filtersets[name.lower()]
 
-    """Return all stored FilterSet names"""
     def filtersetnames(self):
+       """Return all stored FilterSet names"""
        return self._filtersets.keys()
 
-    """Return all Band names of a given FilterSet"""
     def bandnames(self,filterset):
+       """Return all Band names of a given FilterSet"""
        return self._filtersets[filterset].keys()
 
-    """Return all the zero point of a given Band and FilterSet, as astropy Quantity"""
     def zeropoint(self,filterset,band):
+       """Return all the zero point of a given Band and FilterSet, as astropy Quantity"""
        return self._filtersets[filterset][band].zp()
 
-    """Return all the mean wavelength of a given Band and FilterSet, as astropy Quantity"""
     def wavelength(self,filterset,band):
+       """Return all the mean wavelength of a given Band and FilterSet, as astropy Quantity"""
        return self._filtersets[filterset][band].wave()
 
-    """Return all the effective bandwidth of a given Band and FilterSet, as astropy Quantity"""
     def bandwidth(self,filterset,band):
+       """Return all the effective bandwidth of a given Band and FilterSet, as astropy Quantity"""
        return self._filtersets[filterset][band].bw()
 
-    """ Return flux density given a magnitude
-        Example: magtoflux("sloan","SDSS_u",10)  returns 156.85 mJy 
-        Returns astropy Quantity with units u.mJy or u.Jy
-    """
+    #Return flux density given a magnitude
+    #Returns astropy Quantity with units u.mJy or u.Jy
     def magtoflux(self,telescope,band,magnitude,mjy=True):
        """Return the flux density in Jansky or milliJansky of a source as an astropy Quantity, 
           given the source magnitude.
@@ -381,6 +387,8 @@ class FilterSetManager():
              band      - wave band name of telescope e.g., 'u' or SDSS_u for Sloan, IRAC1 or 'I1' for spitzer
              magnitude - magnitude of source, as scalar or astropy magnitude Quantity
              mjy       - boolean to return flux in mJy. True returns mJy, False returns Jy. Default:True
+
+        Example: magtoflux(SLOAN,SDSS_u,10)  returns 156.85 mJy 
        """
        zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
        #print("TBM: %s %s %s %s"%(telescope,band,magnitude,zpjy))
@@ -393,10 +401,8 @@ class FilterSetManager():
        else:
            return value.to(Jy)
 
-    """ Return magnitude given flux density 
-        Example: fluxtomag("sloan","SDSS_u",156.85)  returns 10 mag
-        Returns astropy Quantity with units u.Magnitude)
-    """
+    #Return magnitude given flux density 
+    #Returns astropy Quantity with units u.Magnitude)
     def fluxtomag(self,telescope,band,flux,mjy=True):
        """Return the magnitude given flux in Jansky as magnitude astropy Quantity.
           Parameters:
@@ -405,6 +411,8 @@ class FilterSetManager():
              band      - wave band name of telescope e.g., 'u' for sloan, 'I1' for spitzer
              flux      - flux density of source, scalar in Jy or mJy, or Astropy Quantity with units of flux density
              mjy       - boolean, True if flux was given in mJy False if Jy. Ignored if flux is given as Quantity
+
+        Example: fluxtomag(SLOAN,SDSS_u,156.85)  returns 10 mag
        """
        zpjy = self._filtersets[telescope.lower()][band].zp().to(u.Jy)
        if qh.isQuantity(flux):
@@ -428,6 +436,15 @@ class Photometry():
             print("magnitude is ",p.magnitude,"+/-",p.errormag)
     """
     def __init__(self,bandname,flux,error,validity=1,unit=None):
+       """Initialize a Photometry point.
+          Parameters:
+              bandname - string band name or constant, e.g. SLOAN
+              flux     - the photometric value, astropy quantity with units of flux density or magnitude, or scalar if units provided
+              error - the photometric error, astropy quantity with units of flux density or magnitude, or scalar if units provided
+              validity - integer, 0=invalid, 1=valid, 2=lower limit, 3=upper limit
+              unit - astropy units of flux and error if they were given as a scalar
+              
+       """
        if bandname not in _valid_bands:
           warnings.warn("Unrecognized band name %s. Will not be able to convert between flux density and magnitude." % bandname)
        self._bandname = bandname
@@ -472,7 +489,7 @@ class Photometry():
     @property
     def frequency(self):
         """The frequency of this point as a Quantity"""
-        return self._wavelength.to(u.Hz,equivalencies=u.spectral())
+        return self.wavelength.to(u.Hz,equivalencies=u.spectral())
 
     @property
     def flux(self):
