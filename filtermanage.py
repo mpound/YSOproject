@@ -75,7 +75,7 @@ WISE2  = "WISE2"
 WISE3  = "WISE3"
 WISE4  = "WISE4"
 
-# SOFIA
+"""SOFIA"""
 FORCAST_F054 ="FORCAST_F054"
 FORCAST_F064 ="FORCAST_F064"
 FORCAST_F066 ="FORCAST_F066"
@@ -143,10 +143,10 @@ _valid_bands = {
     WISE4:WISE,
 }
 
-""" Wrapper for _valid_bands array.
-    Returns list of valid bands
-"""
 def validbands(): 
+    """ Wrapper for _valid_bands array.
+        Returns list of valid bands
+    """
     return _valid_bands.keys()
 
 
@@ -416,8 +416,18 @@ class FilterSetManager():
 
 class Photometry():
 #@todo deal with masked values
-    """Class that represents a single photometric point"""
-    def __init__(self,bandname,flux,error,validity,unit=None):
+    """Class that represents a single photometric point.
+       Example:
+            import filtermanage as fm
+            import astropy.units as u
+            bandname = fm.SDSS_g
+            flux = 10.1*u.mag
+            error = 1*u.mag
+            p = fm.Photometry(bandname,flux,error)
+            print("flux is ",p.flux,"+/-",p.error)
+            print("magnitude is ",p.magnitude,"+/-",p.errormag)
+    """
+    def __init__(self,bandname,flux,error,validity=1,unit=None):
        if bandname not in _valid_bands:
           warnings.warn("Unrecognized band name %s. Will not be able to convert between flux density and magnitude." % bandname)
        self._bandname = bandname
@@ -444,32 +454,38 @@ class Photometry():
        self._fsm      = FilterSetManager()
 
     def set_upper_limit(self,sn=3.0):
-    """Indicate a given value is an upper limit"""
+        """Indicate a given value is an upper limit"""
         if self._flux/self._error < sn:
            self._validity = 3  # upper limit flag.
 
     @property
     def band(self):
-    """The Band of this point"""
+        """The Band name of this point (string)"""
         return self._bandname
 
     @property
     def wavelength(self):
-    """The wavelength of this point"""
+        """The wavelength of this point as a Quantity"""
         tel = _valid_bands[self._bandname].lower()
         return self._fsm.wavelength(tel,self._bandname)
 
     @property
+    def frequency(self):
+        """The frequency of this point as a Quantity"""
+        return self._wavelength.to(u.Hz,equivalencies=u.spectral())
+
+    @property
     def flux(self):
-        """return flux as flux density quantity"""
+        """Return flux as flux density quantity"""
         if qh.isMagnitude(self._flux):
             tel = _valid_bands[self._bandname].lower()
             return self._fsm.magtoflux(tel,self._bandname,self._flux) 
         else:
             return self._flux
 
+    @property
     def mjy(self):
-    """Shortcut to get flux value in mJy as a scalar"""
+        """Shortcut to get flux value in mJy as a scalar"""
         return self.flux.to(u.mJy).value
 
     @property
@@ -483,43 +499,69 @@ class Photometry():
 
     @property
     def error(self):
-        """return error as flux density quantity"""
+        """Return error as flux density quantity"""
         if qh.isMagnitude(self._error):
-            tel = _valid_bands[self._bandname].lower()
-            return self._fsm.magtoflux(tel,self._bandname,self._error) 
+            return self.errormjy*u.mJy
         else:
             return self._error
 
+    @property
     def errormag(self):
-        """return error as magnitude quantity"""
+        """Return error as magnitude quantity.  
+           The error on the magnitude is ~1/(S/N) which is ~(flux error)/flux.
+           For a discussion of converting magitude errors to flux errors
+           and vice versa, see e.g., https://www.eso.org/~ohainaut/ccd/sn.html
+           This method uses the full calculation rather than the approximation.
+        """
         if qh.isFluxDensity(self._error):
+        # S/N is the fractional error on the flux
+        # NtoS is 1/(S/N)
             NtoS = self._error/self._flux
             magerror = 2.5*math.log10(1.0+NtoS)
             return u.Magnitude(magerror)
         else:
             return self._error
 
+    @property
     def errormjy(self):
-        """return error in millijanskies as a scalar"""
+        """Return the error in millijanskies as a scalar"""
+        # S/N is the fractional error on the *flux*
+        # NtoS is 1/(S/N)
         if qh.isMagnitude(self._error):
             NtoS = 10.0**(self._error.value/2.5)-1.0
             tel = _valid_bands[self._bandname].lower()
-            fluxmjy=  self._fsm.magtoflux(tel,self._bandname,self._flux)
-            errormjy = fluxmjy * NtoS
-#            print("tel %s, band %s, error %s, NtoS %s fluxmjy %s errormjy %s"%(tel,self._bandname,self._error, NtoS,fluxmjy,errormjy))
-            return errormjy.to(u.mJy).value 
+            _errormjy = self.mjy * NtoS
+            #t1 = -2.5*math.log10(math.e)/fluxmjy.value
+            #errormjy1 = math.fabs(self._error.value*t1)
+            #print("tel %s, band %s, error %s, NtoS %s t1 %s fluxmjy %s errormjy %s e1 %s"%(tel,self._bandname,self._error, NtoS, t1,  fluxmjy,errormjy,errormjy1))
+            return _errormjy
         else:
             return self._error.to(u.mJy).value
 
     @property
     def validity(self):
+        """Return the validity value of this point.
+            0 - not valid/unused
+            1 - valid
+            2 - lower limit
+            3 - upper limit
+        """
         return self._validity
     
     def setvalidity(self,validity):
+        """Set the validity value of this point.
+          Parameters: 
+            validity: - integer, taking a value of:
+                0 - not valid/unused
+                1 - valid
+                2 - lower limit
+                3 - upper limit
+        """
         self._validity = validity
 
     @property
     def units(self):
+        """Return the flux units of this point"""
         return self._flux.unit
 
 
