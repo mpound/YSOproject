@@ -18,6 +18,10 @@ def isFluxDensity(q):
    return False
 
 def isLength(q):
+   """Test if input is an Astropy Quantity with units of length
+      Parameters: 
+        q - input object to test
+   """
    if isQuantity(q):
        return q.unit.is_equivalent("cm")
    return False
