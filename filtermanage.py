@@ -516,9 +516,34 @@ class Photometry():
 
     @property
     def error(self):
-        """Return error as flux density quantity"""
+        """Return error as flux density quantity (Marc's method)"""
         if qh.isMagnitude(self._error):
             return self.errormjy*u.mJy
+        else:
+            return self._error
+    @property
+    def error2(self):
+        """Return error as flux density quantity (Isabelle's method)"""
+        if qh.isMagnitude(self._error):
+           #m_e = 2.5/ln(10) * F_e/F
+           #F_e = m_e*ln(10)/(F*2.5)
+            return self._error.value*self.flux*math.log(10)/2.5
+        else:
+            return self._error
+
+    @property
+    def error3(self):
+        """Return error as flux density quantity (sanity check)"""
+        if qh.isMagnitude(self._error):
+           #m_e = 2.5/ln(10) * F_e/F
+           #F_e = m_e*ln(10)/(F*2.5)
+            valuep = self._flux + self._error
+            valuem = self._flux - self._error
+            #print("V ",valuep,valuem)
+            tel = _valid_bands[self._bandname].lower()
+            fp = self._fsm.magtoflux(tel,self._bandname,valuep)
+            fm = self._fsm.magtoflux(tel,self._bandname,valuem)
+            return fp.unit*(fm.value - fp.value)/2.0
         else:
             return self._error
 
@@ -528,6 +553,7 @@ class Photometry():
            The error on the magnitude is ~1/(S/N) which is ~(flux error)/flux.
            For a discussion of converting magitude errors to flux errors
            and vice versa, see e.g., https://www.eso.org/~ohainaut/ccd/sn.html
+           and http://slittlefair.staff.shef.ac.uk/teaching/phy217/lectures/stats/L18/index.html
            This method uses the full calculation rather than the approximation.
         """
         if qh.isFluxDensity(self._error):
@@ -544,9 +570,9 @@ class Photometry():
         """Return the error in millijanskies as a scalar"""
         # S/N is the fractional error on the *flux*
         # NtoS is 1/(S/N)
+        # error(mag) = 
         if qh.isMagnitude(self._error):
             NtoS = 10.0**(self._error.value/2.5)-1.0
-            tel = _valid_bands[self._bandname].lower()
             _errormjy = self.mjy * NtoS
             #t1 = -2.5*math.log10(math.e)/fluxmjy.value
             #errormjy1 = math.fabs(self._error.value*t1)
